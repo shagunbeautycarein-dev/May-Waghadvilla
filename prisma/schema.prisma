@@ -1,0 +1,514 @@
+// This is your Prisma schema file
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// CORE TABLES
+// ==========================================
+
+model Floor {
+  id         String   @id @default(uuid())
+  name       String   @db.VarChar(50)
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+  deletedAt  DateTime? @map("deleted_at")
+
+  rooms Room[]
+
+  @@map("floors")
+}
+
+model Room {
+  id                  String    @id @default(uuid())
+  floorId             String    @map("floor_id")
+  name                String    @db.VarChar(50)
+  sharingType         String    @map("sharing_type") @db.VarChar(20)
+  acType              String    @map("ac_type") @db.VarChar(20)
+  mealsIncluded       Boolean   @default(false) @map("meals_included")
+  electricityIncluded Boolean   @default(false) @map("electricity_included")
+  wifiName            String?   @map("wifi_name") @db.VarChar(100)
+  wifiPassword        String?   @map("wifi_password") @db.VarChar(100)
+  amenities           String[]
+  images              String[]
+  coverImage          String?   @map("cover_image")
+  description         String?
+  showOnHomePage      Boolean   @default(false) @map("show_on_home_page")
+  status              String    @default("Active") @db.VarChar(20)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+
+  floor             Floor             @relation(fields: [floorId], references: [id])
+  beds              Bed[]
+  guests            Guest[]
+  electricityBills  ElectricityBill[]
+
+  @@index([floorId])
+  @@index([status])
+  @@map("rooms")
+}
+
+model Bed {
+  id              String    @id @default(uuid())
+  roomId          String    @map("room_id")
+  name            String    @db.VarChar(10)
+  rent            Decimal   @db.Decimal(10, 2)
+  deposit         Decimal   @db.Decimal(10, 2)
+  status          String    @default("Available") @db.VarChar(30)
+  currentGuestId  String?   @unique @map("current_guest_id")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  room              Room              @relation(fields: [roomId], references: [id])
+  currentGuest      Guest?            @relation(fields: [currentGuestId], references: [id], name: "CurrentBedGuest")
+  electricitySplits ElectricitySplit[]
+
+  @@index([roomId])
+  @@index([status])
+  @@index([currentGuestId])
+  @@map("beds")
+}
+
+model Inquiry {
+  id                String    @id @default(uuid())
+  name              String    @db.VarChar(100)
+  mobile            String    @db.VarChar(15)
+  email             String?   @db.VarChar(100)
+  visitDate         DateTime  @map("visit_date")
+  timeSlot          String    @map("time_slot") @db.VarChar(20)
+  status            String    @default("New Inquiry") @db.VarChar(20)
+  roomId            String?   @map("room_id")
+  bedId             String?   @map("bed_id")
+  joiningDate       DateTime? @map("joining_date")
+  monthlyRent       Decimal?  @map("monthly_rent") @db.Decimal(10, 2)
+  deposit           Decimal?  @db.Decimal(10, 2)
+  rentCycleDate     Int?      @map("rent_cycle_date")
+  cancellationReason String?  @map("cancellation_reason")
+  createdAt         DateTime  @default(now()) @map("created_at")
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([mobile])
+  @@map("inquiries")
+}
+
+// ==========================================
+// AUTH & USER TABLES
+// ==========================================
+
+model Guest {
+  id              String    @id @default(uuid())
+  name            String    @db.VarChar(100)
+  mobile          String    @db.VarChar(15)
+  email           String?   @unique @db.VarChar(100)
+  passwordHash    String?   @map("password_hash")
+  status          String    @default("Onboarding Started") @db.VarChar(30)
+  roomId          String?   @map("room_id")
+  bedId           String?   @map("bed_id")
+  joiningDate     DateTime? @map("joining_date")
+  leavingDate     DateTime? @map("leaving_date")
+  monthlyRent     Decimal?  @map("monthly_rent") @db.Decimal(10, 2)
+  deposit         Decimal?  @db.Decimal(10, 2)
+  rentCycleDate   Int?      @map("rent_cycle_date")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt       DateTime? @map("deleted_at")
+
+  room              Room?             @relation(fields: [roomId], references: [id])
+  bed               Bed?              @relation(name: "CurrentBedGuest")
+  onboardingData    OnboardingData?
+  onboardingTokens  OnboardingToken[]
+  payments          Payment[]
+  ledger            Ledger[]
+  electricitySplits ElectricitySplit[]
+  complaints        Complaint[]
+  noticeReads       NoticeRead[]
+
+  @@index([email])
+  @@index([status])
+  @@index([mobile])
+  @@index([mobile, status])
+  @@map("guests")
+}
+
+model Admin {
+  id           String    @id @default(uuid())
+  name         String    @db.VarChar(100)
+  email        String    @unique @db.VarChar(100)
+  passwordHash String    @map("password_hash")
+  role         String    @default("Manager") @db.VarChar(20)
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+// ==========================================
+// ONBOARDING & PAYMENT (Phase 2 tables included for schema completeness)
+// ==========================================
+
+model OnboardingData {
+  id              String    @id @default(uuid())
+  guestId         String    @unique @map("guest_id")
+  step1Personal   Json?     @map("step_1_personal")
+  step2Emergency  Json?     @map("step_2_emergency")
+  step3Job        Json?     @map("step_3_job")
+  step4Documents  Json?     @map("step_4_documents")
+  step5RulesAgreed Boolean  @default(false) @map("step_5_rules_agreed")
+  step6TermsAgreed Boolean  @default(false) @map("step_6_terms_agreed")
+  step7LeavingAgreed Boolean @default(false) @map("step_7_leaving_agreed")
+  step8Payment    Json?     @map("step_8_payment")
+  status          String    @default("Draft") @db.VarChar(30)
+  rejectionReason String?   @map("rejection_reason")
+  holdReason      String?   @map("hold_reason")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  guest           Guest     @relation(fields: [guestId], references: [id])
+
+  @@index([guestId])
+  @@index([status])
+  @@map("onboarding_data")
+}
+
+model Payment {
+  id              String    @id @default(uuid())
+  guestId         String    @map("guest_id")
+  amount          Decimal   @db.Decimal(10, 2)
+  type            String    @db.VarChar(20)
+  method          String    @db.VarChar(20)
+  transactionId   String?   @map("transaction_id") @db.VarChar(100)
+  proofImages     String[]  @map("proof_images")
+  status          String    @default("Uploaded") @db.VarChar(20)
+  rejectionReason String?   @map("rejection_reason")
+  approvedBy      String?   @map("approved_by")
+  depositAmount   Decimal?  @map("deposit_amount") @db.Decimal(10, 2)
+  rentAmount      Decimal?  @map("rent_amount") @db.Decimal(10, 2)
+  rentForMonth    Int?      @map("rent_for_month")
+  rentForYear     Int?      @map("rent_for_year")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  guest             Guest             @relation(fields: [guestId], references: [id])
+  electricitySplits ElectricitySplit[]
+
+  @@index([status])
+  @@index([guestId])
+  @@index([createdAt])
+  @@map("payments")
+}
+
+model Ledger {
+  id          String    @id @default(uuid())
+  guestId     String    @map("guest_id")
+  description String    @db.VarChar(255)
+  amount      Decimal   @db.Decimal(10, 2)
+  paid        Decimal   @default(0) @db.Decimal(10, 2)
+  due         Decimal   @db.Decimal(10, 2)
+  status      String    @default("Pending") @db.VarChar(20)
+  paymentId   String?   @map("payment_id")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  guest Guest @relation(fields: [guestId], references: [id])
+
+  @@index([guestId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("ledger")
+}
+
+// ==========================================
+// ELECTRICITY (Phase 2)
+// ==========================================
+
+model ElectricityBill {
+  id           String    @id @default(uuid())
+  roomId       String    @map("room_id")
+  month        Int
+  year         Int
+  totalAmount  Decimal   @map("total_amount") @db.Decimal(10, 2)
+  prevReading  Decimal?  @map("prev_reading") @db.Decimal(10, 2)
+  currReading  Decimal?  @map("curr_reading") @db.Decimal(10, 2)
+  unitRate     Decimal?  @map("unit_rate") @db.Decimal(10, 2)
+  billImage    String?   @map("bill_image")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  room   Room              @relation(fields: [roomId], references: [id])
+  splits ElectricitySplit[]
+
+  @@map("electricity_bills")
+}
+
+model ElectricitySplit {
+  id        String    @id @default(uuid())
+  billId    String    @map("bill_id")
+  bedId     String    @map("bed_id")
+  guestId   String?   @map("guest_id")
+  amount    Decimal   @db.Decimal(10, 2)
+  status    String    @default("Pending") @db.VarChar(20)
+  paymentId String?   @map("payment_id")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  bill    ElectricityBill @relation(fields: [billId], references: [id])
+  bed     Bed             @relation(fields: [bedId], references: [id])
+  guest   Guest?          @relation(fields: [guestId], references: [id])
+  payment Payment?        @relation(fields: [paymentId], references: [id])
+
+  @@index([guestId])
+  @@index([status])
+  @@map("electricity_splits")
+}
+
+// ==========================================
+// COMPLAINTS & NOTICES (Phase 2)
+// ==========================================
+
+model Complaint {
+  id              String    @id @default(uuid())
+  guestId         String    @map("guest_id")
+  category        String    @db.VarChar(30)
+  priority        String    @default("Medium") @db.VarChar(10)
+  description     String
+  status          String    @default("Pending") @db.VarChar(20)
+  remarks         String?
+  assignedStaffId String?   @map("assigned_staff_id")
+  images          String[]
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  guest         Guest     @relation(fields: [guestId], references: [id])
+  assignedStaff Staff?    @relation(fields: [assignedStaffId], references: [id])
+
+  @@index([guestId])
+  @@index([status])
+  @@index([priority])
+  @@map("complaints")
+}
+
+model Notice {
+  id        String    @id @default(uuid())
+  type      String    @db.VarChar(20)
+  targetId  String?   @map("target_id")
+  title     String    @db.VarChar(255)
+  message   String
+  sendDate  DateTime  @default(now()) @map("send_date")
+  expiryDate DateTime? @map("expiry_date")
+  deletedAt DateTime? @map("deleted_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  reads NoticeRead[]
+
+  @@index([type])
+  @@index([targetId])
+  @@map("notices")
+}
+
+model NoticeRead {
+  id        String   @id @default(uuid())
+  noticeId  String   @map("notice_id")
+  guestId   String   @map("guest_id")
+  readAt    DateTime @default(now()) @map("read_at")
+
+  notice Notice @relation(fields: [noticeId], references: [id])
+  guest  Guest  @relation(fields: [guestId], references: [id])
+
+  @@unique([noticeId, guestId])
+  @@map("notice_reads")
+}
+
+// ==========================================
+// ACCOUNTING (Phase 2)
+// ==========================================
+
+model ExpenseCategory {
+  id        String    @id @default(uuid())
+  name      String    @unique @db.VarChar(50)
+  color     String    @default("#0D9488") @db.VarChar(7)
+  isDefault Boolean   @default(false) @map("is_default")
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  expenses Expense[]
+
+  @@map("expense_categories")
+}
+
+model Expense {
+  id           String    @id @default(uuid())
+  categoryId   String?   @map("category_id")
+  category     String?   @db.VarChar(50)
+  amount       Decimal   @db.Decimal(10, 2)
+  date         DateTime
+  vendorName   String?   @map("vendor_name") @db.VarChar(100)
+  paymentMode  String?   @map("payment_mode") @db.VarChar(20)
+  billImage    String?   @map("bill_image")
+  description  String?
+  isRecurring  Boolean   @default(false) @map("is_recurring")
+  parentId     String?   @map("parent_id")
+  createdBy    String?   @map("created_by")
+  deletedAt    DateTime? @map("deleted_at")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  expenseCategory ExpenseCategory? @relation(fields: [categoryId], references: [id])
+
+  @@index([categoryId])
+  @@index([date])
+  @@map("expenses")
+}
+
+// ==========================================
+// STAFF & SETTINGS
+// ==========================================
+
+model Staff {
+  id        String    @id @default(uuid())
+  name      String    @db.VarChar(100)
+  mobile    String?   @db.VarChar(15)
+  role      String    @db.VarChar(50)
+  createdAt DateTime  @default(now()) @map("created_at")
+  deletedAt DateTime? @map("deleted_at")
+
+  complaints Complaint[]
+
+  @@map("staff")
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique @db.VarChar(100)
+  value     String?
+  category  String   @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("settings")
+}
+
+// ==========================================
+// V2 FEATURE TABLES (keep for future)
+// ==========================================
+
+model BedTransfer {
+  id             String    @id @default(uuid())
+  guestId        String    @map("guest_id")
+  oldBedId       String    @map("old_bed_id")
+  newBedId       String    @map("new_bed_id")
+  requestDate    DateTime  @map("request_date")
+  effectiveDate  DateTime  @map("effective_date")
+  oldRent        Decimal?  @map("old_rent") @db.Decimal(10, 2)
+  newRent        Decimal?  @map("new_rent") @db.Decimal(10, 2)
+  rentDifference Decimal?  @map("rent_difference") @db.Decimal(10, 2)
+  reason         String?
+  status         String    @default("requested") @db.VarChar(20)
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  @@map("bed_transfers")
+}
+
+model DepositRefund {
+  id               String    @id @default(uuid())
+  guestId          String    @map("guest_id")
+  amount           Decimal   @db.Decimal(10, 2)
+  deductionReason  String?   @map("deduction_reason")
+  method           String    @db.VarChar(20)
+  proofImage       String?   @map("proof_image")
+  status           String    @default("Pending") @db.VarChar(20)
+  processedBy      String?   @map("processed_by")
+  createdAt        DateTime  @default(now()) @map("created_at")
+
+  @@map("deposit_refunds")
+}
+
+model LeavingRequest {
+  id                    String    @id @default(uuid())
+  guestId               String    @map("guest_id")
+  requestDate           DateTime  @map("request_date")
+  lastDate              DateTime  @map("last_date")
+  reason                String?
+  status                String    @default("submitted") @db.VarChar(30)
+  rejectionReason       String?   @map("rejection_reason")
+  pendingRentAmount     Decimal   @default(0) @map("pending_rent_amount") @db.Decimal(10, 2)
+  pendingElectricityAmount Decimal @default(0) @map("pending_electricity_amount") @db.Decimal(10, 2)
+  damageDeductionAmount Decimal   @default(0) @map("damage_deduction_amount") @db.Decimal(10, 2)
+  refundAmount          Decimal?  @map("refund_amount") @db.Decimal(10, 2)
+  inspectionPassed      Boolean?  @map("inspection_passed")
+  keysReturned          Boolean?  @map("keys_returned")
+  closedBy              String?   @map("closed_by")
+  createdAt             DateTime  @default(now()) @map("created_at")
+
+  @@index([guestId])
+  @@index([status])
+  @@map("leaving_requests")
+}
+
+model VisitorLog {
+  id         String    @id @default(uuid())
+  guestId    String    @map("guest_id")
+  visitorName String   @map("visitor_name") @db.VarChar(100)
+  mobile     String?   @db.VarChar(15)
+  relation   String?   @db.VarChar(50)
+  visitDate  DateTime  @map("visit_date")
+  entryTime  DateTime? @map("entry_time")
+  exitTime   DateTime? @map("exit_time")
+  status     String    @default("expected") @db.VarChar(20)
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@map("visitor_logs")
+}
+
+model OnboardingToken {
+  id        String    @id @default(uuid())
+  guestId   String    @map("guest_id")
+  token     String    @unique @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  guest     Guest     @relation(fields: [guestId], references: [id])
+
+  @@index([token])
+  @@index([guestId])
+  @@map("onboarding_tokens")
+}
+
+model PasswordReset {
+  id        String    @id @default(uuid())
+  guestId   String    @map("guest_id")
+  token     String    @db.VarChar(255)
+  expiresAt DateTime  @map("expires_at")
+  used      Boolean   @default(false)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("password_resets")
+}
+
+model AuditLog {
+  id          String    @id @default(uuid())
+  adminId     String?   @map("admin_id")
+  adminName   String?   @map("admin_name") @db.VarChar(100)
+  action      String    @db.VarChar(50)
+  entity      String    @db.VarChar(50)
+  entityId    String    @map("entity_id")
+  details     Json?
+  ipAddress   String?   @map("ip_address") @db.VarChar(45)
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@index([adminId])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
