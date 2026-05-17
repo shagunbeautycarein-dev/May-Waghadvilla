@@ -30,7 +30,7 @@ const TABS = [
 ];
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = "waghad_villa_unsigned";
+const UPLOAD_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "wahad_villa_unsigned";
 
 async function uploadToCloudinary(file: File, folder: string): Promise<string> {
   if (!CLOUDINARY_CLOUD_NAME) {

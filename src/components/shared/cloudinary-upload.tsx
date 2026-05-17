@@ -47,11 +47,12 @@ export function CloudinaryUpload({
     try {
       const remainingSlots = maxFiles - images.length;
       const filesToUpload = Array.from(files).slice(0, remainingSlots);
+      const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "wahad_villa_unsigned";
 
       for (const file of filesToUpload) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "waghad_villa_unsigned");
+        formData.append("upload_preset", uploadPreset);
         formData.append("folder", folder);
 
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
@@ -61,7 +62,13 @@ export function CloudinaryUpload({
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.error?.message || "Upload failed");
+          const msg = errorData.error?.message || "Upload failed";
+          if (msg.toLowerCase().includes("upload preset not found")) {
+            throw new Error(
+              "Cloudinary upload preset 'wahad_villa_unsigned' not found. Go to Cloudinary Dashboard → Settings → Upload → Upload Presets → Add New. Name it 'wahad_villa_unsigned', set Signing Mode to 'Unsigned', and save."
+            );
+          }
+          throw new Error(msg);
         }
 
         const data = await res.json();

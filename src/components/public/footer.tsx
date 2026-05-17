@@ -29,10 +29,16 @@ export async function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
           <div className="flex flex-col gap-6">
             <Link href="/" className="flex items-center gap-2">
-              <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20">
-                <Sparkles className="w-6 h-6" />
-              </div>
-              <span className="text-xl font-bold tracking-tight">The Waghad Villa</span>
+              {cms["cms_logo"] ? (
+                <div className="relative h-10 w-28">
+                  <img src={cms["cms_logo"]} alt="The Waghad Villa" className="object-contain w-full h-full" />
+                </div>
+              ) : (
+                <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 shrink-0">
+                  <Sparkles className="w-6 h-6" />
+                </div>
+              )}
+              {!cms["cms_logo"] && <span className="text-xl font-bold tracking-tight">The Waghad Villa</span>}
             </Link>
             <p className="text-slate-400 text-sm leading-relaxed">
               Premium PG accommodation in Ambawadi, Ahmedabad. We provide a safe,

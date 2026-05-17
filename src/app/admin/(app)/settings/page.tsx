@@ -563,10 +563,11 @@ export default function AdminSettingsPage() {
                       setQrUploading(true);
                       try {
                         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+                        const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || "wahad_villa_unsigned";
                         if (!cloudName) throw new Error("Cloudinary not configured");
                         const formData = new FormData();
                         formData.append("file", file);
-                        formData.append("upload_preset", "waghad_villa_unsigned");
+                        formData.append("upload_preset", uploadPreset);
                         formData.append("folder", "waghad-villa/payment");
                         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
                           method: "POST",
