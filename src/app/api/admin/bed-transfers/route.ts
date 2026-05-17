@@ -69,6 +69,18 @@ export async function PATCH(request: Request) {
       effective.setHours(0, 0, 0, 0);
       const isFuture = effective > today;
 
+      // Fetch both beds with room info in one parallel query
+      const [oldBed, newBed] = await Promise.all([
+        prisma.bed.findUnique({
+          where: { id: transfer.oldBedId },
+          include: { room: { select: { name: true } } },
+        }),
+        prisma.bed.findUnique({
+          where: { id: transfer.newBedId },
+          include: { room: { select: { name: true } } },
+        }),
+      ]);
+
       // Update old bed
       await prisma.bed.update({
         where: { id: transfer.oldBedId },
@@ -84,12 +96,6 @@ export async function PATCH(request: Request) {
         },
       });
 
-      // Get new bed roomId
-      const newBed = await prisma.bed.findUnique({
-        where: { id: transfer.newBedId },
-        select: { roomId: true },
-      });
-
       // Update guest
       await prisma.guest.update({
         where: { id: transfer.guestId },
@@ -103,21 +109,15 @@ export async function PATCH(request: Request) {
       // Create ledger adjustment for rent difference
       const rentDiffNum = Number(transfer.rentDifference || 0);
       if (rentDiffNum !== 0) {
-        const oldBedRoom = await prisma.bed.findUnique({
-          where: { id: transfer.oldBedId },
-          include: { room: { select: { name: true } } },
-        });
-        const newBedRoom = await prisma.bed.findUnique({
-          where: { id: transfer.newBedId },
-          include: { room: { select: { name: true } } },
-        });
+        const oldRoomName = oldBed?.room?.name || "";
+        const newRoomName = newBed?.room?.name || "";
 
         if (rentDiffNum > 0) {
           // Guest owes more
           await prisma.ledger.create({
             data: {
               guestId: transfer.guestId,
-              description: `Bed Transfer — Rent Increase (${oldBedRoom?.room?.name || ""} → ${newBedRoom?.room?.name || ""})`,
+              description: `Transfer Charge — Additional rent due after bed transfer (${oldRoomName} → ${newRoomName})`,
               amount: rentDiffNum,
               paid: 0,
               due: rentDiffNum,
@@ -130,7 +130,7 @@ export async function PATCH(request: Request) {
           await prisma.ledger.create({
             data: {
               guestId: transfer.guestId,
-              description: `Bed Transfer — Rent Decrease Credit (${oldBedRoom?.room?.name || ""} → ${newBedRoom?.room?.name || ""})`,
+              description: `Transfer Credit — Rent decrease applied as pre-paid credit (${oldRoomName} → ${newRoomName})`,
               amount: absDiff,
               paid: absDiff,
               due: 0,

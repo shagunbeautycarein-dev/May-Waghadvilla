@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { getGuestSession } from "@/lib/supabase/auth";
-import { ArrowRightLeft, Loader2, Bed, Home } from "lucide-react";
+import { ArrowRightLeft, Loader2, Bed, Home, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableSkeleton } from "@/components/shared/data-table-skeleton";
 import { formatCurrency } from "@/lib/formatters";
@@ -39,8 +39,8 @@ type Bed = {
 type GuestData = {
   id: string;
   name: string;
-  room?: { name: string };
-  bed?: { name: string; rent: number };
+  room?: { id: string; name: string };
+  bed?: { id: string; name: string; rent: number };
 };
 
 export default function GuestTransferPage() {
@@ -49,6 +49,7 @@ export default function GuestTransferPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [transferHistory, setTransferHistory] = useState<any[]>([]);
 
   const [selectedRoom, setSelectedRoom] = useState("");
   const [selectedBed, setSelectedBed] = useState("");
@@ -58,20 +59,43 @@ export default function GuestTransferPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
+      // Try Supabase auth first
       const { data: sessionData } = await getGuestSession();
       const email = sessionData.session?.user?.email;
-      if (!email) return;
 
-      const guestRes = await fetch(`/api/guest/profile?email=${encodeURIComponent(email)}`);
+      let guestRes;
+      if (email) {
+        guestRes = await fetch(`/api/guest/profile?email=${encodeURIComponent(email)}`);
+      }
+
+      // Fallback to custom guest_session cookie
+      if (!guestRes || !guestRes.ok) {
+        guestRes = await fetch("/api/guest/me");
+      }
+
+      let parsedGuest: GuestData | null = null;
       if (guestRes.ok) {
-        const g: GuestData = await guestRes.json();
-        setGuest(g);
+        parsedGuest = await guestRes.json();
+        setGuest(parsedGuest);
       }
 
       const roomsRes = await fetch("/api/public/rooms");
       if (roomsRes.ok) {
         const allRooms: Room[] = await roomsRes.json();
-        setRooms(allRooms);
+        // Filter out current room from transfer options
+        const filteredRooms = allRooms
+          .filter((r) => r.id !== parsedGuest?.room?.id) // exclude current room
+          .map((r) => ({
+            ...r,
+            beds: r.beds.filter((b) => b.status === "Available"),
+          }))
+          .filter((r) => r.beds.length > 0); // only rooms with available beds
+        setRooms(filteredRooms);
+      }
+
+      const historyRes = await fetch("/api/guest/bed-transfers");
+      if (historyRes.ok) {
+        setTransferHistory(await historyRes.json());
       }
     } catch {
       // silent
@@ -265,6 +289,41 @@ export default function GuestTransferPage() {
             </Button>
           </div>
         </>
+      )}
+
+      {transferHistory.length > 0 && (
+        <div className="space-y-3">
+          <h2 className="text-sm font-semibold text-slate-900">Transfer History</h2>
+          <div className="space-y-3">
+            {transferHistory.map((t) => (
+              <div key={t.id} className="bg-white rounded-xl border border-slate-100 p-4 shadow-sm">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-sm text-slate-700">
+                    <ArrowRightLeft className="h-4 w-4 text-slate-400" />
+                    <span>{t.oldBed?.room?.name} / {t.oldBed?.name}</span>
+                    <span className="text-slate-400">→</span>
+                    <span>{t.newBed?.room?.name} / {t.newBed?.name}</span>
+                  </div>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
+                    t.status === "requested" ? "bg-amber-100 text-amber-700" :
+                    t.status === "completed" ? "bg-emerald-100 text-emerald-700" :
+                    "bg-red-100 text-red-700"
+                  }`}>
+                    {t.status}
+                  </span>
+                </div>
+                <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
+                  <span>Effective: {new Date(t.effectiveDate).toLocaleDateString()}</span>
+                  {t.rentDifference !== 0 && (
+                    <span className={t.rentDifference > 0 ? "text-amber-600" : "text-emerald-600"}>
+                      {t.rentDifference > 0 ? `+${formatCurrency(t.rentDifference)}` : formatCurrency(t.rentDifference)} /mo
+                    </span>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
 
       {/* Confirmation Dialog */}
