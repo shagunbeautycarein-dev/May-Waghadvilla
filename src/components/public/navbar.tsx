@@ -32,7 +32,7 @@ export function Navbar() {
 
   return (
     <header 
-      className="sticky top-0 z-50 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 py-4 shadow-sm transition-all duration-300"
+      className="sticky top-0 z-50 bg-white/90 dark:bg-[#1F2937]/90 backdrop-blur-lg border-b border-slate-200 dark:border-slate-800 py-4 shadow-sm transition-all duration-300"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
@@ -70,7 +70,7 @@ export function Navbar() {
                 <Menu className="w-6 h-6" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white dark:bg-[#020617] border-l border-slate-200 dark:border-slate-800">
+            <SheetContent side="right" className="bg-white dark:bg-[#1F2937] border-l border-slate-200 dark:border-slate-800">
               <nav className="flex flex-col gap-6 mt-12">
                 {navLinks.map((link) => (
                   <Link

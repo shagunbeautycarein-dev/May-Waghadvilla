@@ -211,7 +211,7 @@ export default async function HomePage() {
             alt="The Waghad Villa"
             className="w-full h-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#020617]/90 via-[#020617]/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#1F2937]/90 via-[#1F2937]/60 to-transparent" />
         </div>
 
         <div className="container relative z-10 mx-auto px-4 sm:px-6 lg:px-8 py-20">
@@ -294,7 +294,7 @@ export default async function HomePage() {
             {amenities.map(({ icon: Icon, label, description }) => (
               <div
                 key={label}
-                className="group relative bg-white dark:bg-[#0f172a] p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+                className="group relative bg-white dark:bg-[#2D3235] p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
               >
                 <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                   <Icon className="w-24 h-24" />
@@ -313,7 +313,7 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Rooms Section */}
-      <section className="py-24 bg-white dark:bg-[#020617]">
+      <section className="py-24 bg-white dark:bg-[#171A1C]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Curated Stays</h2>
@@ -333,7 +333,7 @@ export default async function HomePage() {
                   <Link
                     key={room.id}
                     href={`/rooms/${room.id}`}
-                    className="group bg-white dark:bg-[#0f172a] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-lg overflow-hidden transition-all hover:shadow-2xl block"
+                    className="group bg-white dark:bg-[#2D3235] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-lg overflow-hidden transition-all hover:shadow-2xl block"
                   >
                     <div className="relative h-72 overflow-hidden">
                       <img
@@ -385,7 +385,7 @@ export default async function HomePage() {
                             {minRent !== null ? formatCurrency(minRent) : "Request"}<span className="text-sm font-normal text-slate-500">/mo</span>
                           </p>
                         </div>
-                        <div className="bg-[#020617] dark:bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-12 px-6 flex items-center gap-1 group/btn transition-colors">
+                        <div className="bg-[#1F2937] dark:bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-12 px-6 flex items-center gap-1 group/btn transition-colors">
                           Details <ChevronRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                         </div>
                       </div>
@@ -416,7 +416,7 @@ export default async function HomePage() {
       </section>
 
       {/* Location & Map Section */}
-      <section className="py-24 bg-slate-50 dark:bg-[#0f172a]/50">
+      <section className="py-24 bg-slate-50 dark:bg-[#2D3235]/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -431,7 +431,7 @@ export default async function HomePage() {
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {landmarks.map((l) => (
-                  <div key={l.name} className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#0f172a] shadow-sm border border-slate-100 dark:border-slate-700">
+                  <div key={l.name} className="flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-[#2D3235] shadow-sm border border-slate-100 dark:border-slate-700">
                     <div className="h-10 w-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 flex items-center justify-center text-emerald-600">
                       <MapPin className="w-5 h-5" />
                     </div>
@@ -444,7 +444,7 @@ export default async function HomePage() {
               </div>
             </div>
             
-            <div className="relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white dark:border-[#0f172a] shadow-emerald-900/10">
+            <div className="relative h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-white dark:border-[#2D3235] shadow-brand-900/10">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.936545199616!2d72.54581177607736!3d23.02604811613049!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e84f676451e5d%3A0xe54e339b1393690d!2sAmbawadi%2C%20Ahmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
                 width="100%"
@@ -461,7 +461,7 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-white dark:bg-[#020617] overflow-hidden">
+      <section className="py-24 bg-white dark:bg-[#171A1C] overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Testimonials</h2>
@@ -474,7 +474,7 @@ export default async function HomePage() {
             {testimonials.map((t) => (
               <div
                 key={t.name}
-                className="relative p-10 rounded-[2.5rem] bg-slate-50 dark:bg-[#0f172a] border border-slate-100 dark:border-slate-700 flex flex-col transition-all hover:bg-white dark:hover:bg-navy-700 hover:shadow-xl hover:border-emerald-500/20"
+                className="relative p-10 rounded-[2.5rem] bg-slate-50 dark:bg-[#2D3235] border border-slate-100 dark:border-slate-700 flex flex-col transition-all hover:bg-white dark:hover:bg-navy-700 hover:shadow-xl hover:border-brand-500/20"
               >
                 <div className="absolute top-8 right-8 text-emerald-500/10">
                   <Quote className="w-16 h-16 fill-current" />
@@ -508,7 +508,7 @@ export default async function HomePage() {
       {/* CTA Section */}
       <section className="py-24">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="relative rounded-[3rem] bg-[#020617] overflow-hidden py-20 px-10 text-center">
+          <div className="relative rounded-[3rem] bg-[#1F2937] overflow-hidden py-20 px-10 text-center">
             {/* Abstract Background */}
             <div className="absolute top-0 left-0 w-full h-full opacity-20">
               <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[60%] bg-emerald-500 rounded-full blur-[120px]" />
@@ -543,7 +543,7 @@ export default async function HomePage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-white dark:bg-[#020617]">
+      <section className="py-24 bg-white dark:bg-[#171A1C]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Support</h2>
@@ -574,7 +574,7 @@ export default async function HomePage() {
               <AccordionItem
                 key={i}
                 value={`item-${i}`}
-                className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#0f172a] px-8 transition-all data-[state=open]:bg-white dark:data-[state=open]:bg-navy-700 data-[state=open]:shadow-xl"
+                className="rounded-3xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-[#2D3235] px-8 transition-all data-[state=open]:bg-white dark:data-[state=open]:bg-navy-700 data-[state=open]:shadow-xl"
               >
                 <AccordionTrigger className="text-lg font-bold text-slate-900 dark:text-white hover:no-underline py-6">
                   {faq.q}

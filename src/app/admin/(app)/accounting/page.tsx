@@ -304,7 +304,7 @@ export default function AccountingPage() {
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 <BarChart data={combinedChart}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E4E6E8" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                   <YAxis
                     tick={{ fontSize: 12 }}
@@ -314,7 +314,7 @@ export default function AccountingPage() {
                     formatter={(value: unknown) => formatCurrency(value as number | string | undefined)}
                   />
                   <Legend />
-                  <Bar dataKey="income" fill="#10b981" radius={[4, 4, 0, 0]} name="Income" />
+                  <Bar dataKey="income" fill="#C85A17" radius={[4, 4, 0, 0]} name="Income" />
                   <Bar dataKey="expense" fill="#ef4444" radius={[4, 4, 0, 0]} name="Expense" />
                 </BarChart>
               </ResponsiveContainer>
@@ -341,7 +341,7 @@ export default function AccountingPage() {
             ) : (
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={cashFlow}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E4E6E8" />
                   <XAxis dataKey="day" tick={{ fontSize: 12 }} />
                   <YAxis
                     tick={{ fontSize: 12 }}
@@ -354,7 +354,7 @@ export default function AccountingPage() {
                   <Line
                     type="monotone"
                     dataKey="moneyIn"
-                    stroke="#10b981"
+                    stroke="#C85A17"
                     strokeWidth={2}
                     dot={false}
                     name="Money In"

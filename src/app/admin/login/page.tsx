@@ -84,7 +84,7 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#020617]">
+    <div className="min-h-screen flex items-center justify-center relative overflow-hidden bg-[#1F2937]">
       {/* Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full opacity-30 pointer-events-none">
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-emerald-600 rounded-full blur-[150px]" />
@@ -177,7 +177,7 @@ export default function AdminLoginPage() {
       </div>
 
       <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
-        <DialogContent className="bg-[#0f172a] border-white/10 text-white sm:max-w-sm">
+        <DialogContent className="bg-[#2D3235] border-white/10 text-white sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="text-white">Reset Password</DialogTitle>
           </DialogHeader>

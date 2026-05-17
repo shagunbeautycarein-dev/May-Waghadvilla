@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 
 const PRESET_COLORS = [
-  "#0d9488", "#059669", "#2563eb", "#7c3aed", "#db2777",
+  "#C85A17", "#E67E33", "#2563eb", "#7c3aed", "#db2777",
   "#dc2626", "#ea580c", "#ca8a04", "#52525b", "#0891b2",
 ];
 
