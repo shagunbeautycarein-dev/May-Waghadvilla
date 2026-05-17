@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useId } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,6 +17,7 @@ import {
   X,
   Plus,
   Upload,
+  Eye,
 } from "lucide-react";
 
 const TABS = [
@@ -51,8 +52,137 @@ async function uploadToCloudinary(file: File, folder: string): Promise<string> {
   }
 
   const data = await res.json();
+  if (!data.secure_url) {
+    throw new Error("Upload response missing URL");
+  }
   return data.secure_url as string;
 }
+
+/* ------------------------------------------------------------------ */
+/*  Reusable sub-components (defined outside main to keep refs stable)  */
+/* ------------------------------------------------------------------ */
+
+function ImageField({
+  label,
+  keyName,
+  placeholder,
+  url,
+  isUploading,
+  onChange,
+  onUpload,
+}: {
+  label: string;
+  keyName: string;
+  placeholder?: string;
+  url: string;
+  isUploading: boolean;
+  onChange: (val: string) => void;
+  onUpload: (file: File) => void;
+}) {
+  const inputId = useId();
+
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs font-medium text-slate-600">{label}</Label>
+
+      {url && (
+        <div className="relative w-fit max-w-full group">
+          <img
+            src={url}
+            alt={label}
+            className="h-24 max-w-xs object-contain rounded-lg border border-slate-100 bg-white"
+            onError={() => toast.error(`Failed to load ${label} preview`)}
+          />
+          <button
+            type="button"
+            onClick={() => onChange("")}
+            className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+            title="Remove image"
+          >
+            <X className="h-3 w-3" />
+          </button>
+        </div>
+      )}
+
+      <div className="flex items-center gap-2">
+        <Input
+          value={url}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="rounded-xl border-slate-200"
+        />
+        <input
+          id={inputId}
+          type="file"
+          hidden
+          accept="image/jpeg,image/png,image/webp,image/jpg,image/svg+xml"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) onUpload(file);
+            // reset so same file can be selected again
+            e.target.value = "";
+          }}
+        />
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          onClick={() => document.getElementById(inputId)?.click()}
+          disabled={isUploading}
+          className="rounded-full border-slate-200 h-9 px-3 shrink-0"
+        >
+          {isUploading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Upload className="h-3.5 w-3.5 mr-1" />
+          )}
+          {isUploading ? "Uploading" : "Upload"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function Field({
+  label,
+  value,
+  type = "text",
+  placeholder,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  type?: string;
+  placeholder?: string;
+  onChange: (val: string) => void;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label className="text-xs font-medium text-slate-600">{label}</Label>
+      {type === "textarea" ? (
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={4}
+          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 resize-none"
+        />
+      ) : (
+        <Input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          className="rounded-xl border-slate-200"
+        />
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main page                                                          */
+/* ------------------------------------------------------------------ */
 
 export default function CMSPage() {
   const [settings, setSettings] = useState<Record<string, string>>({});
@@ -62,24 +192,20 @@ export default function CMSPage() {
   const [galleryImages, setGalleryImages] = useState<string[]>([]);
   const [uploadingKey, setUploadingKey] = useState<string | null>(null);
   const [uploadingGallery, setUploadingGallery] = useState(false);
-  const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const galleryInputRef = useRef<HTMLInputElement | null>(null);
+  const galleryInputId = useId();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const res = await fetch("/api/admin/cms");
-      if (res.ok) {
-        const data = await res.json();
-        setSettings(data);
-        try {
-          const parsed = JSON.parse(data.cms_gallery_images || "[]");
-          setGalleryImages(Array.isArray(parsed) ? parsed : []);
-        } catch {
-          setGalleryImages([]);
-        }
-      } else {
-        toast.error("Failed to load CMS settings");
+      if (!res.ok) throw new Error("Failed to fetch");
+      const data = await res.json();
+      setSettings(data);
+      try {
+        const parsed = JSON.parse(data.cms_gallery_images || "[]");
+        setGalleryImages(Array.isArray(parsed) ? parsed : []);
+      } catch {
+        setGalleryImages([]);
       }
     } catch {
       toast.error("Failed to load CMS settings");
@@ -92,9 +218,9 @@ export default function CMSPage() {
     fetchData();
   }, [fetchData]);
 
-  const updateSetting = (key: string, value: string) => {
+  const updateSetting = useCallback((key: string, value: string) => {
     setSettings((prev) => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
   const handleSave = async () => {
     setSaving(true);
@@ -122,13 +248,12 @@ export default function CMSPage() {
     try {
       const url = await uploadToCloudinary(file, "wahad-villa/cms");
       updateSetting(keyName, url);
-      toast.success("Image uploaded");
+      toast.success(`${keyName.replace("cms_", "")} uploaded successfully`);
     } catch (e: any) {
+      console.error("Upload error:", e);
       toast.error(e.message || "Upload failed");
     } finally {
       setUploadingKey(null);
-      const input = fileInputRefs.current[keyName];
-      if (input) input.value = "";
     }
   };
 
@@ -152,117 +277,16 @@ export default function CMSPage() {
         toast.success(`${urls.length} image(s) added to gallery`);
       }
     } catch (e: any) {
+      console.error("Gallery upload error:", e);
       toast.error(e.message || "Gallery upload failed");
     } finally {
       setUploadingGallery(false);
-      if (galleryInputRef.current) galleryInputRef.current.value = "";
     }
   };
 
   const removeGalleryImage = (index: number) => {
     setGalleryImages((prev) => prev.filter((_, i) => i !== index));
   };
-
-  const ImageField = ({
-    label,
-    keyName,
-    placeholder,
-  }: {
-    label: string;
-    keyName: string;
-    placeholder?: string;
-  }) => {
-    const url = settings[keyName] || "";
-    const isUploading = uploadingKey === keyName;
-    return (
-      <div className="space-y-2">
-        <Label className="text-xs font-medium text-slate-600">{label}</Label>
-        {url && (
-          <div className="relative w-fit max-w-full group">
-            <img
-              src={url}
-              alt={label}
-              className="h-20 max-w-xs object-contain rounded-lg border border-slate-100 bg-white"
-            />
-            <button
-              type="button"
-              onClick={() => updateSetting(keyName, "")}
-              className="absolute -top-2 -right-2 h-6 w-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
-              title="Remove image"
-            >
-              <X className="h-3 w-3" />
-            </button>
-          </div>
-        )}
-        <div className="flex items-center gap-2">
-          <Input
-            value={url}
-            onChange={(e) => updateSetting(keyName, e.target.value)}
-            placeholder={placeholder}
-            className="rounded-xl border-slate-200"
-          />
-          <input
-            type="file"
-            ref={(el) => { fileInputRefs.current[keyName] = el; }}
-            hidden
-            accept="image/jpeg,image/png,image/webp,image/jpg"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) handleSingleUpload(keyName, file);
-            }}
-          />
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            onClick={() => fileInputRefs.current[keyName]?.click()}
-            disabled={isUploading}
-            className="rounded-full border-slate-200 h-9 px-3 shrink-0"
-          >
-            {isUploading ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            ) : (
-              <Upload className="h-3.5 w-3.5 mr-1" />
-            )}
-            {isUploading ? "Uploading" : "Upload"}
-          </Button>
-        </div>
-      </div>
-    );
-  };
-
-  const Field = ({
-    label,
-    keyName,
-    type = "text",
-    placeholder,
-  }: {
-    label: string;
-    keyName: string;
-    type?: string;
-    placeholder?: string;
-  }) => (
-    <div className="space-y-2">
-      <Label className="text-xs font-medium text-slate-600">{label}</Label>
-      {type === "textarea" ? (
-        <textarea
-          value={settings[keyName] || ""}
-          onChange={(e) => updateSetting(keyName, e.target.value)}
-          placeholder={placeholder}
-          rows={4}
-          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none"
-        />
-      ) : (
-        <Input
-          type={type}
-          value={settings[keyName] || ""}
-          onChange={(e) => updateSetting(keyName, e.target.value)}
-          placeholder={placeholder}
-          className="rounded-xl border-slate-200"
-        />
-      )}
-    </div>
-  );
 
   if (loading) {
     return (
@@ -274,6 +298,7 @@ export default function CMSPage() {
 
   return (
     <div className="space-y-6">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl md:text-2xl font-semibold text-slate-900">CMS</h1>
@@ -282,7 +307,7 @@ export default function CMSPage() {
         <Button
           onClick={handleSave}
           disabled={saving}
-          className="rounded-full bg-teal-600 hover:bg-teal-700 text-white h-10 px-5"
+          className="rounded-full bg-brand-600 hover:bg-brand-700 text-white h-10 px-5"
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4 mr-1.5" />}
           Save
@@ -293,13 +318,14 @@ export default function CMSPage() {
       <div className="flex flex-wrap gap-2">
         {TABS.map((tab) => {
           const Icon = tab.icon;
+          const isActive = activeTab === tab.key;
           return (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
               className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium border transition-all ${
-                activeTab === tab.key
-                  ? "bg-teal-50 border-teal-200 text-teal-700"
+                isActive
+                  ? "bg-brand-50 border-brand-200 text-brand-700"
                   : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
               }`}
             >
@@ -312,44 +338,135 @@ export default function CMSPage() {
 
       {/* Tab Content */}
       <div className="bg-white rounded-xl border border-slate-100 p-5 md:p-6 space-y-5">
+        {/* ---------- LOGO ---------- */}
         {activeTab === "logo" && (
           <div className="space-y-5 max-w-lg">
-            <ImageField label="Logo URL" keyName="cms_logo" placeholder="https://..." />
-            <ImageField label="Favicon URL" keyName="cms_favicon" placeholder="https://..." />
-          </div>
-        )}
+            <ImageField
+              label="Logo URL"
+              keyName="cms_logo"
+              placeholder="https://..."
+              url={settings.cms_logo || ""}
+              isUploading={uploadingKey === "cms_logo"}
+              onChange={(v) => updateSetting("cms_logo", v)}
+              onUpload={(file) => handleSingleUpload("cms_logo", file)}
+            />
+            <ImageField
+              label="Favicon URL"
+              keyName="cms_favicon"
+              placeholder="https://..."
+              url={settings.cms_favicon || ""}
+              isUploading={uploadingKey === "cms_favicon"}
+              onChange={(v) => updateSetting("cms_favicon", v)}
+              onUpload={(file) => handleSingleUpload("cms_favicon", file)}
+            />
 
-        {activeTab === "hero" && (
-          <div className="space-y-5 max-w-lg">
-            <ImageField label="Hero Image URL" keyName="cms_hero_image" placeholder="https://..." />
-            <Field label="Hero Tagline" keyName="cms_hero_tagline" placeholder="Welcome to The Waghad Villa" />
-            <Field label="Hero Subtitle" keyName="cms_hero_subtitle" placeholder="Premium PG accommodation in Ahmedabad" />
-            {settings.cms_hero_image && (
-              <img src={settings.cms_hero_image} alt="Hero preview" className="w-full h-48 object-cover rounded-xl" />
+            {/* Live preview */}
+            {(settings.cms_logo || settings.cms_favicon) && (
+              <div className="p-4 rounded-xl border border-slate-100 bg-slate-50/50 space-y-3">
+                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Live Preview</p>
+                {settings.cms_logo && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-500 w-16">Logo</span>
+                    <img src={settings.cms_logo} alt="Logo preview" className="h-12 object-contain" />
+                  </div>
+                )}
+                {settings.cms_favicon && (
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs text-slate-500 w-16">Favicon</span>
+                    <img src={settings.cms_favicon} alt="Favicon preview" className="h-8 w-8 object-contain rounded" />
+                  </div>
+                )}
+              </div>
             )}
           </div>
         )}
 
+        {/* ---------- HERO ---------- */}
+        {activeTab === "hero" && (
+          <div className="space-y-5 max-w-lg">
+            <ImageField
+              label="Hero Image URL"
+              keyName="cms_hero_image"
+              placeholder="https://..."
+              url={settings.cms_hero_image || ""}
+              isUploading={uploadingKey === "cms_hero_image"}
+              onChange={(v) => updateSetting("cms_hero_image", v)}
+              onUpload={(file) => handleSingleUpload("cms_hero_image", file)}
+            />
+            <Field
+              label="Hero Tagline"
+              value={settings.cms_hero_tagline || ""}
+              placeholder="Welcome to The Waghad Villa"
+              onChange={(v) => updateSetting("cms_hero_tagline", v)}
+            />
+            <Field
+              label="Hero Subtitle"
+              value={settings.cms_hero_subtitle || ""}
+              placeholder="Premium PG accommodation in Ahmedabad"
+              onChange={(v) => updateSetting("cms_hero_subtitle", v)}
+            />
+            {settings.cms_hero_image && (
+              <div className="rounded-xl border border-slate-100 overflow-hidden">
+                <img src={settings.cms_hero_image} alt="Hero preview" className="w-full h-48 object-cover" />
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* ---------- ABOUT ---------- */}
         {activeTab === "about" && (
           <div className="space-y-5 max-w-lg">
-            <Field label="About Text" keyName="cms_about_text" type="textarea" placeholder="Write about your PG..." />
-            <ImageField label="About Image URL" keyName="cms_about_image" placeholder="https://..." />
+            <Field
+              label="About Text"
+              value={settings.cms_about_text || ""}
+              type="textarea"
+              placeholder="Write about your PG..."
+              onChange={(v) => updateSetting("cms_about_text", v)}
+            />
+            <ImageField
+              label="About Image URL"
+              keyName="cms_about_image"
+              placeholder="https://..."
+              url={settings.cms_about_image || ""}
+              isUploading={uploadingKey === "cms_about_image"}
+              onChange={(v) => updateSetting("cms_about_image", v)}
+              onUpload={(file) => handleSingleUpload("cms_about_image", file)}
+            />
             {settings.cms_about_image && (
               <img src={settings.cms_about_image} alt="About preview" className="w-full h-48 object-cover rounded-xl" />
             )}
           </div>
         )}
 
+        {/* ---------- CONTACT ---------- */}
         {activeTab === "contact" && (
           <div className="space-y-5 max-w-lg">
-            <Field label="Phone" keyName="cms_contact_phone" placeholder="+91 98765 43210" />
-            <Field label="WhatsApp" keyName="cms_contact_whatsapp" placeholder="+91 98765 43210" />
-            <Field label="Email" keyName="cms_contact_email" placeholder="info@wahadvilla.com" />
-            <Field label="Address" keyName="cms_contact_address" type="textarea" placeholder="Full address..." />
-            <Field label="Google Map Embed URL" keyName="cms_contact_map" placeholder="https://www.google.com/maps/embed..." />
+            <Field label="Phone" value={settings.cms_contact_phone || ""} placeholder="+91 98765 43210" onChange={(v) => updateSetting("cms_contact_phone", v)} />
+            <Field label="WhatsApp" value={settings.cms_contact_whatsapp || ""} placeholder="+91 98765 43210" onChange={(v) => updateSetting("cms_contact_whatsapp", v)} />
+            <Field label="Email" value={settings.cms_contact_email || ""} placeholder="info@wahadvilla.com" onChange={(v) => updateSetting("cms_contact_email", v)} />
+            <Field label="Address" value={settings.cms_contact_address || ""} type="textarea" placeholder="Full address..." onChange={(v) => updateSetting("cms_contact_address", v)} />
+            <Field label="Google Map Embed URL" value={settings.cms_contact_map || ""} placeholder="https://www.google.com/maps/embed..." onChange={(v) => updateSetting("cms_contact_map", v)} />
+
+            {settings.cms_contact_map && (
+              <div className="rounded-xl border border-slate-100 overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <iframe
+                  src={settings.cms_contact_map}
+                  width="100%"
+                  height="200"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Location map"
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
         )}
 
+        {/* ---------- GALLERY ---------- */}
         {activeTab === "gallery" && (
           <div className="space-y-5">
             <div className="flex items-center justify-between">
@@ -358,19 +475,20 @@ export default function CMSPage() {
               </h3>
               <div className="flex items-center gap-2">
                 <input
+                  id={galleryInputId}
                   type="file"
-                  ref={galleryInputRef}
                   hidden
                   multiple
                   accept="image/jpeg,image/png,image/webp,image/jpg"
                   onChange={(e) => {
                     if (e.target.files) handleGalleryUpload(e.target.files);
+                    e.target.value = "";
                   }}
                 />
                 <Button
                   size="sm"
                   variant="outline"
-                  onClick={() => galleryInputRef.current?.click()}
+                  onClick={() => document.getElementById(galleryInputId)?.click()}
                   disabled={uploadingGallery || galleryImages.length >= 20}
                   className="rounded-full border-slate-200"
                 >
@@ -407,14 +525,30 @@ export default function CMSPage() {
           </div>
         )}
 
+        {/* ---------- SOCIAL ---------- */}
         {activeTab === "social" && (
           <div className="space-y-5 max-w-lg">
-            <Field label="Facebook URL" keyName="cms_social_facebook" placeholder="https://facebook.com/..." />
-            <Field label="Instagram URL" keyName="cms_social_instagram" placeholder="https://instagram.com/..." />
-            <Field label="Twitter URL" keyName="cms_social_twitter" placeholder="https://twitter.com/..." />
-            <Field label="LinkedIn URL" keyName="cms_social_linkedin" placeholder="https://linkedin.com/..." />
+            <Field label="Facebook URL" value={settings.cms_social_facebook || ""} placeholder="https://facebook.com/..." onChange={(v) => updateSetting("cms_social_facebook", v)} />
+            <Field label="Instagram URL" value={settings.cms_social_instagram || ""} placeholder="https://instagram.com/..." onChange={(v) => updateSetting("cms_social_instagram", v)} />
+            <Field label="Twitter URL" value={settings.cms_social_twitter || ""} placeholder="https://twitter.com/..." onChange={(v) => updateSetting("cms_social_twitter", v)} />
+            <Field label="LinkedIn URL" value={settings.cms_social_linkedin || ""} placeholder="https://linkedin.com/..." onChange={(v) => updateSetting("cms_social_linkedin", v)} />
           </div>
         )}
+      </div>
+
+      {/* Floating preview link */}
+      <div className="flex justify-end">
+        <Button
+          variant="outline"
+          size="sm"
+          asChild
+          className="rounded-full border-slate-200 text-slate-600"
+        >
+          <a href="/" target="_blank" rel="noopener noreferrer">
+            <Eye className="h-3.5 w-3.5 mr-1.5" />
+            Preview Website
+          </a>
+        </Button>
       </div>
     </div>
   );
