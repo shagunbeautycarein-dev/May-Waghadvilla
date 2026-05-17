@@ -281,7 +281,7 @@ function ImageUploadField() {
             <FormLabel className="text-slate-700">Room Photos</FormLabel>
             {images.length > 0 && (
               <span className="text-xs text-slate-500">
-                {images.length} photo{images.length > 1 ? "s" : ""} â€¢ Click a photo to set as cover
+                {images.length} photo{images.length > 1 ? "s" : ""} • Click a photo to set as cover
               </span>
             )}
           </div>
@@ -769,7 +769,7 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
           <h4 className="text-sm font-semibold text-slate-700">Summary</h4>
           <div className="grid grid-cols-2 gap-y-2 text-sm">
             <span className="text-slate-500">Room</span>
-            <span className="font-medium text-slate-700">{roomName || "â€”"}</span>
+            <span className="font-medium text-slate-700">{roomName || "—"}</span>
             <span className="text-slate-500">Floor</span>
             <span className="font-medium text-slate-700">{floorLabel}</span>
             <span className="text-slate-500">Sharing</span>
@@ -785,7 +785,7 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
             <span className="text-slate-500">Photos</span>
             <span className="font-medium text-slate-700">
               {(watch("images") || []).length} uploaded
-              {watch("coverImage") ? " â€¢ Cover set" : ""}
+              {watch("coverImage") ? " • Cover set" : ""}
             </span>
             <span className="text-slate-500">WiFi</span>
             <span className="font-medium text-slate-700">
@@ -1594,7 +1594,7 @@ export default function RoomsPage() {
               Add Room
             </DialogTitle>
             <DialogDescription className="text-slate-500">
-              Step {wizardStep} of 5 â€” {STEPS[wizardStep - 1].label}
+              Step {wizardStep} of 5 — {STEPS[wizardStep - 1].label}
             </DialogDescription>
           </DialogHeader>
 
@@ -1647,7 +1647,7 @@ export default function RoomsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Dialog â€” keep tabs for edit, wizard only for add */}
+      {/* Edit Dialog — keep tabs for edit, wizard only for add */}
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl">
           <DialogHeader>

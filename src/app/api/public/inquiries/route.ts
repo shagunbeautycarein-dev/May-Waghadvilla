@@ -9,11 +9,18 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
 
+    if (!body.name || !body.mobile || !body.email || !body.visitDate || !body.timeSlot) {
+      return NextResponse.json(
+        { error: "Name, mobile, email, visit date, and time slot are required" },
+        { status: 400 }
+      );
+    }
+
     const inquiry = await prisma.inquiry.create({
       data: {
         name: body.name,
         mobile: body.mobile,
-        email: body.email || null,
+        email: body.email,
         visitDate: new Date(body.visitDate),
         timeSlot: body.timeSlot,
         roomId: body.roomId || null,

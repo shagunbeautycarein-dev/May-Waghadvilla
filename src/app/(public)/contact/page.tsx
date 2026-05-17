@@ -50,7 +50,7 @@ export default async function ContactPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        {/* Left â€” Inquiry Form */}
+        {/* Left — Inquiry Form */}
         <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm">
           <h2 className="text-lg font-semibold text-slate-900 mb-6 tracking-tight">
             Send an Inquiry
@@ -60,7 +60,7 @@ export default async function ContactPage() {
           </Suspense>
         </div>
 
-        {/* Right â€” Contact Info */}
+        {/* Right — Contact Info */}
         <div className="space-y-8">
           <div className="rounded-2xl border border-slate-100 bg-white p-6 sm:p-8 shadow-sm space-y-6">
             <h2 className="text-lg font-semibold text-slate-900 tracking-tight">
@@ -137,29 +137,27 @@ export default async function ContactPage() {
               </h3>
             </div>
             <div className="space-y-2 text-sm text-slate-600">
-              <p>Morning: 9:00 AM â€“ 12:00 PM</p>
-              <p>Afternoon: 12:00 PM â€“ 4:00 PM</p>
-              <p>Evening: 4:00 PM â€“ 8:00 PM</p>
+              <p>Morning: 9:00 AM – 12:00 PM</p>
+              <p>Afternoon: 12:00 PM – 4:00 PM</p>
+              <p>Evening: 4:00 PM – 8:00 PM</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Map */}
-      {mapEmbed && (
-        <div className="mt-10 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-          <iframe
-            src={mapEmbed}
-            width="100%"
-            height="400"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            title="The Waghad Villa Location"
-          />
-        </div>
-      )}
+      <div className="mt-10 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+        <iframe
+          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.0!2d72.5714!3d23.0225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAxJzIxLjAiTiA3MsKwMzQnMTcuMCJF!5e0!3m2!1sen!2sin!4v1"
+          width="100%"
+          height="400"
+          style={{ border: 0 }}
+          allowFullScreen
+          loading="lazy"
+          referrerPolicy="no-referrer-when-downgrade"
+          title="The Waghad Villa location map"
+        />
+      </div>
     </div>
   );
 }

@@ -728,7 +728,7 @@ export default function AdminSettingsPage() {
             ) : staff.length === 0 ? (
               <EmptyState icon={Users} title="No staff members" subtitle="Add staff members to manage property operations." actionLabel="Add Staff Member" action={() => setShowStaffForm(true)} />
             ) : (
-              <table className="w-full text-sm">
+              <div className="w-full overflow-x-auto"><table className="w-full text-sm whitespace-nowrap">
                 <thead>
                   <tr className="bg-slate-50 text-slate-500 text-xs uppercase">
                     <th className="text-left px-4 py-3 font-medium">Name</th>
@@ -760,7 +760,7 @@ export default function AdminSettingsPage() {
                     </tr>
                   ))}
                 </tbody>
-              </table>
+              </table></div>
             )}
           </div>
         </div>

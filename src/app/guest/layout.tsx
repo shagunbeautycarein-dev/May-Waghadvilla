@@ -124,7 +124,7 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
           <div className="h-12 w-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-xl shadow-emerald-900/20 animate-pulse">
             <Sparkles className="w-6 h-6 text-white" />
           </div>
-          <p className="text-sm text-slate-400 font-medium">Loading your dashboardâ€¦</p>
+          <p className="text-sm text-slate-400 font-medium">Loading your dashboard…</p>
         </div>
       </div>
     );
@@ -137,8 +137,52 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
     .slice(0, 2)
     .toUpperCase();
 
+  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
+  const [showInstallBanner, setShowInstallBanner] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+      setTimeout(() => setShowInstallBanner(true), 3000);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (installPrompt as any).prompt();
+    setInstallPrompt(null);
+    setShowInstallBanner(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
+      {/* PWA Install Banner */}
+      {showInstallBanner && (
+        <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-6 md:bottom-6 md:w-80">
+          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
+            <div className="h-10 w-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold">Install App</p>
+              <p className="text-xs text-slate-400">Add Waghad Villa to your home screen</p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <button onClick={handleInstall} className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
+                Install
+              </button>
+              <button onClick={() => setShowInstallBanner(false)} className="text-slate-400 hover:text-white p-1">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* â”€â”€ Desktop Sidebar â”€â”€ */}
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-100 flex-col shrink-0 sticky top-0 h-screen">
         {/* Brand */}
@@ -307,12 +351,12 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* â”€â”€ Main Content â”€â”€ */}
-      <main className="flex-1 overflow-auto pb-20 md:pb-0">
+      <main className="flex-1 overflow-auto pb-[calc(5rem+var(--spacing-safe))] md:pb-0 min-w-0">
         {children}
       </main>
 
       {/* â”€â”€ Mobile Bottom Navigation â”€â”€ */}
-      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-100">
+      <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-100 pb-safe">
         <div className="flex items-stretch h-16">
           {BOTTOM_NAV.map((item) => {
             const active = pathname === item.href;

@@ -9,7 +9,6 @@ import {
   AlertTriangle,
   Loader2,
   Trash2,
-  Check,
   Users,
   MessageSquare,
   Home,
@@ -28,12 +27,17 @@ import {
   Wallet,
   LogOut,
   X,
+  Layers,
+  ScrollText,
+  Shield,
+  Lock,
 } from "lucide-react";
 
 const RESET_OPTIONS = [
-  { key: "guests", label: "All Guests", icon: Users, description: "Soft-delete all guests and free beds" },
+  { key: "guests", label: "All Guests", icon: Users, description: "Permanently delete all guests, emails, passwords & related data" },
   { key: "inquiries", label: "All Inquiries", icon: MessageSquare, description: "Delete all inquiry records" },
-  { key: "rooms_and_beds", label: "Rooms & Beds", icon: Home, description: "Soft-delete all rooms and beds" },
+  { key: "rooms_and_beds", label: "Rooms & Beds", icon: Home, description: "Permanently delete all rooms and beds" },
+  { key: "floors", label: "All Floors", icon: Layers, description: "Delete all floor definitions" },
   { key: "onboarding_tokens", label: "Onboarding Tokens", icon: Key, description: "Delete all onboarding tokens" },
   { key: "onboarding_data", label: "Onboarding Data", icon: ClipboardList, description: "Delete all onboarding submissions" },
   { key: "payments", label: "All Payments", icon: CreditCard, description: "Delete all payment records" },
@@ -41,12 +45,15 @@ const RESET_OPTIONS = [
   { key: "complaints", label: "All Complaints", icon: AlertCircle, description: "Delete all complaints" },
   { key: "notices", label: "All Notices", icon: Bell, description: "Delete all notices and reads" },
   { key: "electricity", label: "Electricity Bills", icon: Zap, description: "Delete all bills and splits" },
-  { key: "expenses", label: "All Expenses", icon: FileText, description: "Soft-delete all expenses" },
-  { key: "expense_categories", label: "Expense Categories", icon: Tag, description: "Soft-delete all custom categories" },
+  { key: "expenses", label: "All Expenses", icon: FileText, description: "Permanently delete all expenses" },
+  { key: "expense_categories", label: "Expense Categories", icon: Tag, description: "Permanently delete all custom categories" },
   { key: "visitors", label: "Visitor Logs", icon: UserCheck, description: "Delete all visitor logs" },
   { key: "bed_transfers", label: "Bed Transfers", icon: ArrowRightLeft, description: "Delete all transfer records" },
   { key: "deposit_refunds", label: "Deposit Refunds", icon: Wallet, description: "Delete all refund records" },
   { key: "leaving_requests", label: "Leaving Requests", icon: LogOut, description: "Delete all leaving requests" },
+  { key: "password_resets", label: "Password Reset Tokens", icon: Lock, description: "Delete all guest password reset tokens" },
+  { key: "audit_logs", label: "Audit Logs", icon: ScrollText, description: "Delete all admin action audit logs" },
+  { key: "staff", label: "All Staff", icon: Shield, description: "Delete all staff records" },
 ];
 
 export function SystemResetPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
@@ -218,7 +225,7 @@ export function SystemResetPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
           ) : (
             <div className="space-y-3 rounded-xl bg-red-50 border border-red-200 p-4">
               <p className="text-sm font-medium text-red-800">
-                Are you sure? This will delete {selectedCount} category/categories of data.
+                Are you sure? This will permanently erase {selectedCount} category/categories of data.
               </p>
               <div className="flex gap-2">
                 <Button
@@ -252,7 +259,7 @@ export function SystemResetPanel({ isSuperAdmin }: { isSuperAdmin: boolean }) {
             Full System Reset
           </CardTitle>
           <p className="text-xs text-red-700">
-            Wipes ALL data except admin accounts and settings. This is irreversible.
+            Wipes ALL data except admin accounts and settings. Guest emails, passwords, and all personal data are permanently erased. This is irreversible.
           </p>
         </CardHeader>
         <CardContent className="space-y-4">

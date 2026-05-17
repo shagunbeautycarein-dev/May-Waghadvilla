@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 /**
  * One-time setup endpoint.
  * Creates the default Super Admin if no admin exists in the database.
- * Safe to call multiple times â€” it only creates if none exist.
+ * Safe to call multiple times — it only creates if none exist.
  */
 export async function GET() {
   try {

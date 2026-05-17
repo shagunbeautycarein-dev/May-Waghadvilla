@@ -104,7 +104,7 @@ export async function Footer() {
 
         <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-6">
           <p className="text-slate-500 text-xs">
-            Â© {new Date().getFullYear()} The Waghad Villa. All rights reserved.
+            © {new Date().getFullYear()} The Waghad Villa. All rights reserved.
           </p>
           <div className="flex gap-8 text-slate-500 text-xs uppercase tracking-widest">
             <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>

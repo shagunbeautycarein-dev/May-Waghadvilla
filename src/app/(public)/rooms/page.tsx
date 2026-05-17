@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { SHARING_TYPES } from "@/lib/constants";
 import { Filter, X, BedDouble } from "lucide-react";
 import { breadcrumbSchema } from "@/lib/schema";
@@ -95,110 +96,122 @@ export default function RoomsPage() {
         )}
       </div>
 
-      <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">Sharing Type</h4>
-        <div className="space-y-2">
-          {SHARING_TYPES.map((type) => (
-            <div key={type} className="flex items-center gap-2">
+      <Accordion type="multiple" defaultValue={["item-1", "item-2", "item-3", "item-4", "item-5"]} className="space-y-4">
+        <AccordionItem value="item-1" className="border-none">
+          <AccordionTrigger className="text-sm font-medium text-slate-700 py-0 hover:no-underline mb-3">Sharing Type</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              {SHARING_TYPES.map((type) => (
+                <div key={type} className="flex items-center gap-2">
+                  <Checkbox
+                    id={`sharing-${type}`}
+                    checked={sharingTypes.includes(type)}
+                    onCheckedChange={() => toggleSharingType(type)}
+                  />
+                  <Label htmlFor={`sharing-${type}`} className="text-sm text-slate-600">
+                    {type}
+                  </Label>
+                </div>
+              ))}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-2" className="border-none">
+          <AccordionTrigger className="text-sm font-medium text-slate-700 py-0 hover:no-underline mb-3">AC Type</AccordionTrigger>
+          <AccordionContent>
+            <div className="space-y-2">
+              {["AC", "Non-AC"].map((type) => (
+                <div key={type} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="acType"
+                    id={`ac-${type}`}
+                    checked={acType === type}
+                    onChange={() => setAcType(type)}
+                    className="h-4 w-4 text-teal-700 border-slate-300 focus:ring-teal-700"
+                  />
+                  <Label htmlFor={`ac-${type}`} className="text-sm text-slate-600">
+                    {type}
+                  </Label>
+                </div>
+              ))}
+              {acType && (
+                <button
+                  onClick={() => setAcType("")}
+                  className="text-xs text-teal-700 hover:underline mt-1"
+                >
+                  Reset
+                </button>
+              )}
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-3" className="border-none">
+          <AccordionTrigger className="text-sm font-medium text-slate-700 py-0 hover:no-underline mb-3">Meals Included</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex items-center gap-2">
               <Checkbox
-                id={`sharing-${type}`}
-                checked={sharingTypes.includes(type)}
-                onCheckedChange={() => toggleSharingType(type)}
+                id="meals"
+                checked={mealsIncluded}
+                onCheckedChange={(checked) => setMealsIncluded(checked === true)}
               />
-              <Label htmlFor={`sharing-${type}`} className="text-sm text-slate-600">
-                {type}
+              <Label htmlFor="meals" className="text-sm text-slate-600">
+                Yes
               </Label>
             </div>
-          ))}
-        </div>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
 
-      <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">AC Type</h4>
-        <div className="space-y-2">
-          {["AC", "Non-AC"].map((type) => (
-            <div key={type} className="flex items-center gap-2">
-              <input
-                type="radio"
-                name="acType"
-                id={`ac-${type}`}
-                checked={acType === type}
-                onChange={() => setAcType(type)}
-                className="h-4 w-4 text-teal-700 border-slate-300 focus:ring-teal-700"
+        <AccordionItem value="item-4" className="border-none">
+          <AccordionTrigger className="text-sm font-medium text-slate-700 py-0 hover:no-underline mb-3">Price Range (₹)</AccordionTrigger>
+          <AccordionContent>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <Label htmlFor="minPrice" className="text-xs text-slate-500 mb-1 block">
+                  Min
+                </Label>
+                <Input
+                  id="minPrice"
+                  type="number"
+                  placeholder="0"
+                  value={minPrice}
+                  onChange={(e) => setMinPrice(e.target.value)}
+                />
+              </div>
+              <div>
+                <Label htmlFor="maxPrice" className="text-xs text-slate-500 mb-1 block">
+                  Max
+                </Label>
+                <Input
+                  id="maxPrice"
+                  type="number"
+                  placeholder="20000"
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(e.target.value)}
+                />
+              </div>
+            </div>
+          </AccordionContent>
+        </AccordionItem>
+
+        <AccordionItem value="item-5" className="border-none">
+          <AccordionTrigger className="text-sm font-medium text-slate-700 py-0 hover:no-underline mb-3">Availability</AccordionTrigger>
+          <AccordionContent>
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="available"
+                checked={availableOnly}
+                onCheckedChange={(checked) => setAvailableOnly(checked === true)}
               />
-              <Label htmlFor={`ac-${type}`} className="text-sm text-slate-600">
-                {type}
+              <Label htmlFor="available" className="text-sm text-slate-600">
+                Available beds only
               </Label>
             </div>
-          ))}
-          {acType && (
-            <button
-              onClick={() => setAcType("")}
-              className="text-xs text-teal-700 hover:underline mt-1"
-            >
-              Reset
-            </button>
-          )}
-        </div>
-      </div>
-
-      <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">Meals Included</h4>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="meals"
-            checked={mealsIncluded}
-            onCheckedChange={(checked) => setMealsIncluded(checked === true)}
-          />
-          <Label htmlFor="meals" className="text-sm text-slate-600">
-            Yes
-          </Label>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">Price Range (â‚¹)</h4>
-        <div className="grid grid-cols-2 gap-2">
-          <div>
-            <Label htmlFor="minPrice" className="text-xs text-slate-500 mb-1 block">
-              Min
-            </Label>
-            <Input
-              id="minPrice"
-              type="number"
-              placeholder="0"
-              value={minPrice}
-              onChange={(e) => setMinPrice(e.target.value)}
-            />
-          </div>
-          <div>
-            <Label htmlFor="maxPrice" className="text-xs text-slate-500 mb-1 block">
-              Max
-            </Label>
-            <Input
-              id="maxPrice"
-              type="number"
-              placeholder="20000"
-              value={maxPrice}
-              onChange={(e) => setMaxPrice(e.target.value)}
-            />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h4 className="text-sm font-medium text-slate-700 mb-3">Availability</h4>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="available"
-            checked={availableOnly}
-            onCheckedChange={(checked) => setAvailableOnly(checked === true)}
-          />
-          <Label htmlFor="available" className="text-sm text-slate-600">
-            Available beds only
-          </Label>
-        </div>
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
     </div>
   );
 
@@ -339,7 +352,7 @@ export default function RoomsPage() {
                     <div className="text-sm px-1">
                       {minRent !== null ? (
                         <span className="font-semibold text-teal-700">
-                          Starting â‚¹{minRent.toLocaleString("en-IN")}/mo
+                          Starting ₹{minRent.toLocaleString("en-IN")}/mo
                         </span>
                       ) : (
                         <span className="text-slate-400">Rent on request</span>

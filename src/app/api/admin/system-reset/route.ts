@@ -6,6 +6,7 @@ const RESET_TARGETS = [
   "guests",
   "inquiries",
   "rooms_and_beds",
+  "floors",
   "onboarding_tokens",
   "onboarding_data",
   "payments",
@@ -19,6 +20,9 @@ const RESET_TARGETS = [
   "bed_transfers",
   "deposit_refunds",
   "leaving_requests",
+  "password_resets",
+  "audit_logs",
+  "staff",
 ] as const;
 
 type ResetTarget = (typeof RESET_TARGETS)[number];
@@ -49,7 +53,7 @@ export async function POST(request: Request) {
       await performFullReset();
       return NextResponse.json({
         success: true,
-        message: "Full system reset completed. Admin accounts and settings preserved.",
+        message: "Full system reset completed. Admin accounts and settings preserved. All guest data permanently erased.",
       });
     }
 
@@ -87,33 +91,51 @@ export async function POST(request: Request) {
 
 async function performFullReset() {
   await prisma.$transaction([
-    // Soft delete all guests (this also frees beds via trigger logic if any)
-    prisma.guest.updateMany({
-      where: { deletedAt: null },
-      data: { deletedAt: new Date(), status: "Inactive", bedId: null, roomId: null },
-    }),
-    // Reset all beds to Available
-    prisma.bed.updateMany({
-      where: {},
-      data: { status: "Available", currentGuestId: null },
-    }),
-    // Delete data tables
-    prisma.inquiry.deleteMany({}),
-    prisma.onboardingToken.deleteMany({}),
+    // 1. Junction / child records first
+    prisma.noticeRead.deleteMany({}),
+    prisma.electricitySplit.deleteMany({}),
+
+    // 2. Delete all records with explicit FK relations to Guest
     prisma.onboardingData.deleteMany({}),
+    prisma.onboardingToken.deleteMany({}),
     prisma.payment.deleteMany({}),
     prisma.ledger.deleteMany({}),
     prisma.complaint.deleteMany({}),
-    prisma.noticeRead.deleteMany({}),
-    prisma.notice.deleteMany({}),
-    prisma.electricitySplit.deleteMany({}),
-    prisma.electricityBill.deleteMany({}),
-    prisma.expense.updateMany({ where: { deletedAt: null }, data: { deletedAt: new Date() } }),
-    prisma.expenseCategory.updateMany({ where: { deletedAt: null }, data: { deletedAt: new Date() } }),
     prisma.visitorLog.deleteMany({}),
+
+    // 3. Delete records referencing Bed / Room / Guest (no explicit Prisma relations)
     prisma.bedTransfer.deleteMany({}),
     prisma.depositRefund.deleteMany({}),
     prisma.leavingRequest.deleteMany({}),
+    prisma.passwordReset.deleteMany({}),
+
+    // 4. Delete electricity bills (referenced by splits, already deleted)
+    prisma.electricityBill.deleteMany({}),
+
+    // 5. Clear bed guest references before hard-deleting guests
+    prisma.bed.updateMany({ where: {}, data: { currentGuestId: null } }),
+
+    // 6. HARD DELETE all guests — emails, passwords, everything permanently gone
+    prisma.guest.deleteMany({}),
+
+    // 7. Delete expenses before categories
+    prisma.expense.deleteMany({}),
+
+    // 8. Delete remaining independent records
+    prisma.inquiry.deleteMany({}),
+    prisma.notice.deleteMany({}),
+    prisma.expenseCategory.deleteMany({}),
+    prisma.staff.deleteMany({}),
+    prisma.auditLog.deleteMany({}),
+
+    // 9. Delete beds
+    prisma.bed.deleteMany({}),
+
+    // 10. Delete rooms
+    prisma.room.deleteMany({}),
+
+    // 11. Delete floors
+    prisma.floor.deleteMany({}),
   ]);
 }
 
@@ -123,11 +145,22 @@ async function performSelectiveReset(targets: ResetTarget[]) {
   for (const target of targets) {
     switch (target) {
       case "guests": {
-        const res = await prisma.guest.updateMany({
-          where: { deletedAt: null },
-          data: { deletedAt: new Date(), status: "Inactive", bedId: null, roomId: null },
-        });
-        await prisma.bed.updateMany({ where: {}, data: { status: "Available", currentGuestId: null } });
+        // Hard-delete guests: first clear child records, then guests
+        await prisma.onboardingData.deleteMany({});
+        await prisma.onboardingToken.deleteMany({});
+        await prisma.payment.deleteMany({});
+        await prisma.ledger.deleteMany({});
+        await prisma.complaint.deleteMany({});
+        await prisma.visitorLog.deleteMany({});
+        await prisma.bedTransfer.deleteMany({});
+        await prisma.depositRefund.deleteMany({});
+        await prisma.leavingRequest.deleteMany({});
+        await prisma.passwordReset.deleteMany({});
+        await prisma.electricitySplit.deleteMany({});
+        await prisma.electricityBill.deleteMany({});
+        await prisma.bed.updateMany({ where: {}, data: { currentGuestId: null } });
+        const res = await prisma.guest.deleteMany({});
+        await prisma.bed.updateMany({ where: {}, data: { status: "Available" } });
         results.guests = res.count;
         break;
       }
@@ -137,11 +170,18 @@ async function performSelectiveReset(targets: ResetTarget[]) {
         break;
       }
       case "rooms_and_beds": {
-        await prisma.bed.updateMany({ where: {}, data: { status: "Available", currentGuestId: null } });
-        const beds = await prisma.bed.updateMany({ where: { deletedAt: null }, data: { deletedAt: new Date() } });
-        const rooms = await prisma.room.updateMany({ where: { deletedAt: null }, data: { deletedAt: new Date() } });
+        await prisma.electricitySplit.deleteMany({});
+        await prisma.electricityBill.deleteMany({});
+        await prisma.bed.updateMany({ where: {}, data: { currentGuestId: null } });
+        const beds = await prisma.bed.deleteMany({});
+        const rooms = await prisma.room.deleteMany({});
         results.rooms = rooms.count;
         results.beds = beds.count;
+        break;
+      }
+      case "floors": {
+        const res = await prisma.floor.deleteMany({});
+        results.floors = res.count;
         break;
       }
       case "onboarding_tokens": {
@@ -155,6 +195,7 @@ async function performSelectiveReset(targets: ResetTarget[]) {
         break;
       }
       case "payments": {
+        await prisma.electricitySplit.deleteMany({});
         const res = await prisma.payment.deleteMany({});
         results.payments = res.count;
         break;
@@ -182,18 +223,13 @@ async function performSelectiveReset(targets: ResetTarget[]) {
         break;
       }
       case "expenses": {
-        const res = await prisma.expense.updateMany({
-          where: { deletedAt: null },
-          data: { deletedAt: new Date() },
-        });
+        const res = await prisma.expense.deleteMany({});
         results.expenses = res.count;
         break;
       }
       case "expense_categories": {
-        const res = await prisma.expenseCategory.updateMany({
-          where: { deletedAt: null },
-          data: { deletedAt: new Date() },
-        });
+        await prisma.expense.deleteMany({});
+        const res = await prisma.expenseCategory.deleteMany({});
         results.expense_categories = res.count;
         break;
       }
@@ -215,6 +251,21 @@ async function performSelectiveReset(targets: ResetTarget[]) {
       case "leaving_requests": {
         const res = await prisma.leavingRequest.deleteMany({});
         results.leaving_requests = res.count;
+        break;
+      }
+      case "password_resets": {
+        const res = await prisma.passwordReset.deleteMany({});
+        results.password_resets = res.count;
+        break;
+      }
+      case "audit_logs": {
+        const res = await prisma.auditLog.deleteMany({});
+        results.audit_logs = res.count;
+        break;
+      }
+      case "staff": {
+        const res = await prisma.staff.deleteMany({});
+        results.staff = res.count;
         break;
       }
     }

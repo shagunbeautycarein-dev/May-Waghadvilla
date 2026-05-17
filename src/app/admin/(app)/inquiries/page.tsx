@@ -827,7 +827,7 @@ export default function InquiriesPage() {
                     <div className="flex items-center gap-3 mt-2 text-xs">
                       <div className="flex items-center gap-1 text-slate-600">
                         <Home className="h-3 w-3 text-slate-400" />
-                        {roomMap.get(inquiry.roomId) || "â€”"}
+                        {roomMap.get(inquiry.roomId) || "—"}
                       </div>
                       {inquiry.bedId && (
                         <div className="flex items-center gap-1 text-slate-600">
@@ -1067,8 +1067,8 @@ export default function InquiriesPage() {
                   </TableCell>
                   <TableCell className="text-slate-600 text-sm">
                     {inquiry.roomId
-                      ? `${roomMap.get(inquiry.roomId) || "â€”"}${inquiry.bedId ? ` / Bed ${bedMap.get(inquiry.bedId) || ""}` : ""}`
-                      : "â€”"}
+                      ? `${roomMap.get(inquiry.roomId) || "—"}${inquiry.bedId ? ` / Bed ${bedMap.get(inquiry.bedId) || ""}` : ""}`
+                      : "—"}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end gap-1.5 flex-wrap">

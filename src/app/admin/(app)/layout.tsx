@@ -38,7 +38,7 @@ export default async function AdminLayout({
         <AdminSidebar admin={admin} />
         <div className="md:pl-64 flex flex-col min-h-screen">
           <AdminHeader admin={admin} />
-          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto">{children}</main>
+          <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto min-w-0">{children}</main>
           <Toaster />
         </div>
       </div>

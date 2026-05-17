@@ -27,6 +27,7 @@ import { CloudinaryUpload } from "@/components/shared/cloudinary-upload";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableSkeleton } from "@/components/shared/data-table-skeleton";
 import { formatCurrency, formatDate } from "@/lib/formatters";
+import { MobileTableWrapper, MobileCards, MobileCard } from "@/components/admin/mobile-table";
 
 interface Guest {
   id: string;
@@ -313,10 +314,10 @@ export default function GuestRentPage() {
         />
       ) : (
         <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
-          <div className="px-5 py-4 border-b border-slate-100">
+          <div className="px-5 py-4 border-b border-slate-100 hidden md:block">
             <h2 className="text-sm font-semibold text-slate-900">Payment Ledger</h2>
           </div>
-          <div className="overflow-x-auto">
+          <MobileTableWrapper>
             <Table>
               <TableHeader>
                 <TableRow className="hover:bg-transparent border-slate-100">
@@ -356,7 +357,62 @@ export default function GuestRentPage() {
                 ))}
               </TableBody>
             </Table>
-          </div>
+          </MobileTableWrapper>
+
+          <MobileCards
+            data={ledger}
+            className="md:hidden"
+            renderCard={(entry) => (
+              <MobileCard
+                title={
+                  <div className="flex items-center justify-between w-full">
+                    <span className="truncate pr-2">{entry.description}</span>
+                    <span
+                      className={`inline-flex shrink-0 items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                        LEDGER_STATUS_COLORS[entry.status] || "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {entry.status}
+                    </span>
+                  </div>
+                }
+              >
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Date:</span>
+                  <span className="font-medium text-slate-900">{formatDate(entry.dueDate)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Amount:</span>
+                  <span className="font-medium text-slate-900">{formatCurrency(entry.amount)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Paid:</span>
+                  <span className="font-medium text-slate-900">{formatCurrency(entry.paid)}</span>
+                </div>
+                <div className="flex justify-between pt-1 mt-1 border-t border-slate-100">
+                  <span className="text-slate-500 font-medium">Due:</span>
+                  <span className={`font-semibold ${Number(entry.due) > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                    {formatCurrency(entry.due)}
+                  </span>
+                </div>
+                {Number(entry.due) > 0 && (
+                  <div className="pt-2 mt-2">
+                    <Button
+                      size="sm"
+                      className="w-full rounded-xl bg-teal-600 hover:bg-teal-700 text-white"
+                      onClick={() => {
+                        setUploadData((prev) => ({ ...prev, amount: String(entry.due) }));
+                        setShowUpload(true);
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      Pay Now
+                    </Button>
+                  </div>
+                )}
+              </MobileCard>
+            )}
+          />
         </div>
       )}
     </div>

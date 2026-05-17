@@ -176,7 +176,7 @@ export default function GuestComplaintsPage() {
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white"
+                  className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm bg-white min-h-[44px]"
                 >
                   <option value="">Select category</option>
                   {CATEGORIES.map((c) => (
@@ -193,7 +193,7 @@ export default function GuestComplaintsPage() {
                       key={p}
                       type="button"
                       onClick={() => setPriority(p)}
-                      className={`flex-1 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      className={`flex-1 py-2.5 min-h-[44px] rounded-xl text-sm font-medium border transition-all ${
                         priority === p
                           ? "bg-teal-50 border-teal-200 text-teal-700"
                           : "bg-white border-slate-200 text-slate-500"
@@ -212,7 +212,7 @@ export default function GuestComplaintsPage() {
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe your issue in detail (min 20 characters)..."
                   rows={4}
-                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none"
+                  className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none min-h-[44px]"
                 />
                 <p className="text-xs text-slate-400 text-right">{description.length} chars</p>
               </div>

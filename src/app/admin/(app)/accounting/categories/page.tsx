@@ -210,7 +210,7 @@ export default function CategoriesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <div className="w-full overflow-x-auto"><table className="w-full text-sm whitespace-nowrap">
               <thead>
                 <tr className="bg-slate-50 text-slate-500 text-xs uppercase">
                   <th className="text-left px-4 py-3 font-medium">Color</th>
@@ -310,7 +310,7 @@ export default function CategoriesPage() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </table></div>
           </div>
         )}
       </div>

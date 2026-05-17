@@ -160,7 +160,7 @@ export default function DailyEntryPage() {
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+          <div className="w-full overflow-x-auto"><table className="w-full text-sm whitespace-nowrap">
             <thead>
               <tr className="bg-slate-50 text-slate-500 text-xs uppercase">
                 <th className="text-left px-3 py-2 font-medium w-48">Category *</th>
@@ -244,7 +244,7 @@ export default function DailyEntryPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         </div>
 
         <div className="mt-4 flex items-center justify-between">

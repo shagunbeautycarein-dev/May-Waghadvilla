@@ -25,8 +25,10 @@ import {
   ChevronDown,
   Sparkles,
   AlertTriangle,
+  Menu,
+  X,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -99,17 +101,55 @@ export function AdminSidebar({ admin }: { admin: { name: string; role: string } 
     window.location.href = "/admin/login";
   };
 
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
   return (
-    <aside className="hidden md:flex w-64 bg-slate-900 flex-col shrink-0 fixed inset-y-0 left-0 z-40">
+    <>
+      {/* Mobile Hamburger Button */}
+      <button
+        onClick={() => setMobileOpen(true)}
+        className="md:hidden fixed top-3.5 left-4 z-50 p-2 text-slate-600 bg-white rounded-xl shadow-sm border border-slate-200 transition-colors hover:bg-slate-50"
+        aria-label="Open menu"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+
+      {/* Mobile Overlay */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+          onClick={() => setMobileOpen(false)}
+        />
+      )}
+
+      <aside 
+        className={cn(
+          "w-72 max-w-[85vw] md:w-64 bg-slate-900 flex-col shrink-0 fixed inset-y-0 left-0 z-40 transition-transform duration-300 ease-in-out shadow-2xl md:shadow-none",
+          mobileOpen ? "translate-x-0 flex" : "-translate-x-full md:translate-x-0 hidden md:flex"
+        )}
+      >
       {/* Brand */}
-      <div className="h-16 flex items-center gap-3 px-5 border-b border-white/10 shrink-0">
-        <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-900/30">
-          <Sparkles className="w-4 h-4 text-white" />
+      <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+            <Sparkles className="w-4 h-4 text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-white leading-none">The Waghad Villa</p>
+            <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Admin Panel</p>
+          </div>
         </div>
-        <div>
-          <p className="text-sm font-bold text-white leading-none">The Waghad Villa</p>
-          <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Admin Panel</p>
-        </div>
+        <button
+          onClick={() => setMobileOpen(false)}
+          className="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
+        >
+          <X className="w-5 h-5" />
+        </button>
       </div>
 
       {/* Navigation */}
@@ -211,6 +251,7 @@ export function AdminSidebar({ admin }: { admin: { name: string; role: string } 
         </div>
       </div>
     </aside>
+    </>
   );
 }
 

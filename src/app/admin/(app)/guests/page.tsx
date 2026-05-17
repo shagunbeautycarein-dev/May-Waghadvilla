@@ -19,6 +19,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+
 import {
   Table,
   TableBody,
@@ -70,6 +71,7 @@ import { generateGuestPDF } from "@/lib/guest-pdf";
 import { AddGuestModal } from "@/components/admin/add-guest-modal";
 import { EmptyState } from "@/components/shared/empty-state";
 import { DataTableSkeleton } from "@/components/shared/data-table-skeleton";
+import { MobileTableWrapper, MobileCards, MobileCard } from "@/components/admin/mobile-table";
 import { formatDate, formatCurrency } from "@/lib/formatters";
 import {
   Tooltip,
@@ -472,7 +474,7 @@ export default function GuestsPage() {
 
       {/* Table */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <MobileTableWrapper>
           <Table>
             <TableHeader>
               <TableRow className="hover:bg-transparent border-slate-100 bg-slate-50/50">
@@ -598,7 +600,56 @@ export default function GuestsPage() {
               )}
             </TableBody>
           </Table>
-        </div>
+        </MobileTableWrapper>
+
+        {!loading && guests.length > 0 && (
+          <MobileCards
+            data={guests}
+            className="p-4"
+            renderCard={(guest) => (
+              <MobileCard
+                title={
+                  <div className="flex items-center justify-between w-full">
+                    <span>{guest.name}</span>
+                    <Badge variant="outline" className={`rounded-full text-[10px] font-medium ${STATUS_COLORS[guest.status] || "bg-slate-100 text-slate-600"}`}>
+                      {guest.status}
+                    </Badge>
+                  </div>
+                }
+                actions={
+                  <>
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => openDetail(guest.id)}>View</Button>
+                    <Button size="sm" variant="outline" className="flex-1" onClick={() => openEdit(guest)}>Edit</Button>
+                  </>
+                }
+              >
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Mobile:</span>
+                  <span className="font-medium text-slate-900">{guest.mobile}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Room/Bed:</span>
+                  <span className="font-medium text-slate-900">{guest.room?.name || "—"} / {guest.bed?.name || "—"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Joining Date:</span>
+                  <span className="font-medium text-slate-900">{formatDate(guest.joiningDate)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Rent:</span>
+                  <span className="font-medium text-slate-900">{formatCurrency(guest.monthlyRent)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500">Due Amount:</span>
+                  <span className={`font-semibold ${guest.totalDue > 0 ? "text-red-600" : "text-emerald-600"}`}>
+                    {formatCurrency(guest.totalDue)}
+                  </span>
+                </div>
+              </MobileCard>
+            )}
+          />
+        )}
+
 
         {/* Pagination */}
         {totalPages > 1 && (
@@ -619,168 +670,326 @@ export default function GuestsPage() {
         )}
       </div>
 
-      {/* ─── Detail Slide-out Panel ──────────────────────────────────── */}
-      <Sheet open={!!detailGuest || detailLoading} onOpenChange={(open) => { if (!open) setDetailGuest(null); }}>
-        <SheetContent side="right" className="w-full !max-w-[1000px] sm:w-[90vw] md:w-[80vw] lg:w-[1000px] p-0 gap-0 border-l border-slate-200 overflow-hidden">
-          <SheetTitle className="sr-only">
-            {detailGuest ? `${detailGuest.name} — Guest Details` : "Guest Details"}
-          </SheetTitle>
-          {detailLoading ? (
-            <div className="h-full flex items-center justify-center">
-              <Loader2 className="h-8 w-8 text-slate-400 animate-spin" />
-            </div>
-          ) : detailGuest ? (
-            <div className="flex h-full">
-              {/* ── Left Sidebar ── */}
-              <div className="w-60 bg-slate-50 border-r border-slate-200 flex flex-col shrink-0">
-                {/* Profile Card */}
-                <div className="p-5 border-b border-slate-200">
-                  <div className="relative mx-auto w-20 h-20 mb-3">
+      {/* ─── Guest Detail: Custom Overlay Modal ──────────────────────── */}
+      {(!!detailGuest || detailLoading) && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.55)", backdropFilter: "blur(4px)" }}
+          onClick={(e) => { if (e.target === e.currentTarget) setDetailGuest(null); }}
+        >
+          {/* ══════════════ DESKTOP MODAL ══════════════ */}
+          <div className="hidden md:flex w-full max-w-[1080px] mx-4 h-[88vh] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            {detailLoading ? (
+              <div className="flex-1 flex items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-3">
+                  <Loader2 className="h-8 w-8 text-teal-500 animate-spin" />
+                  <p className="text-sm text-slate-400 font-medium">Loading guest profile…</p>
+                </div>
+              </div>
+            ) : detailGuest ? (
+              <>
+                {/* Left Sidebar */}
+                <div className="w-[240px] bg-slate-50 border-r border-slate-200 flex flex-col shrink-0">
+                  {/* Profile */}
+                  <div className="px-5 py-6 border-b border-slate-200">
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="relative shrink-0">
+                        {detailGuest.onboardingData?.step4Documents?.photo ? (
+                          <img src={detailGuest.onboardingData.step4Documents.photo} alt={detailGuest.name}
+                            className="w-14 h-14 rounded-xl object-cover border-2 border-white shadow-md" />
+                        ) : (
+                          <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-xl font-bold text-white shadow-md">
+                            {detailGuest.name[0].toUpperCase()}
+                          </div>
+                        )}
+                        <span className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-slate-50 ${
+                          detailGuest.status === "Active" ? "bg-emerald-500" :
+                          detailGuest.status === "Notice Period" ? "bg-amber-500" :
+                          detailGuest.status === "Inactive" ? "bg-slate-400" : "bg-blue-500"
+                        }`} />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-bold text-slate-900 truncate leading-tight">{detailGuest.name}</p>
+                        <p className="text-xs text-slate-500 truncate mt-0.5">{detailGuest.mobile}</p>
+                        <span className={`inline-block mt-1.5 px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                          detailGuest.status === "Active" ? "bg-emerald-100 text-emerald-700" :
+                          detailGuest.status === "Notice Period" ? "bg-amber-100 text-amber-700" :
+                          detailGuest.status === "Inactive" ? "bg-slate-100 text-slate-600" :
+                          "bg-blue-100 text-blue-700"
+                        }`}>{detailGuest.status}</span>
+                      </div>
+                    </div>
+                    {/* Stat chips */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between bg-white rounded-lg border border-slate-200 px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <Home className="h-3.5 w-3.5 text-slate-400" />
+                          <span className="text-xs text-slate-500">Room</span>
+                        </div>
+                        <span className="text-xs font-bold text-slate-800">{detailGuest.room?.name || "—"}</span>
+                      </div>
+                      <div className="flex items-center justify-between bg-white rounded-lg border border-slate-200 px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <BedDouble className="h-3.5 w-3.5 text-slate-400" />
+                          <span className="text-xs text-slate-500">Bed</span>
+                        </div>
+                        <span className="text-xs font-bold text-slate-800">{detailGuest.bed?.name || "—"}</span>
+                      </div>
+                      <div className={`flex items-center justify-between rounded-lg border px-3 py-2 ${
+                        detailGuest.ledger.reduce((s, l) => s + l.due, 0) > 0
+                          ? "bg-red-50 border-red-200"
+                          : "bg-emerald-50 border-emerald-200"
+                      }`}>
+                        <div className="flex items-center gap-2">
+                          <IndianRupee className={`h-3.5 w-3.5 ${detailGuest.ledger.reduce((s, l) => s + l.due, 0) > 0 ? "text-red-500" : "text-emerald-500"}`} />
+                          <span className={`text-xs font-medium ${detailGuest.ledger.reduce((s, l) => s + l.due, 0) > 0 ? "text-red-600" : "text-emerald-600"}`}>Due</span>
+                        </div>
+                        <span className={`text-xs font-bold ${detailGuest.ledger.reduce((s, l) => s + l.due, 0) > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                          {formatCurrency(detailGuest.ledger.reduce((s, l) => s + l.due, 0))}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Nav */}
+                  <nav className="flex-1 overflow-y-auto py-2 px-2">
+                    {[
+                      { id: "personal", label: "Personal Info", icon: User },
+                      { id: "emergency", label: "Emergency", icon: Shield },
+                      { id: "job", label: "Job Details", icon: Briefcase },
+                      { id: "documents", label: "KYC Docs", icon: FileImage },
+                      { id: "room", label: "Room & Bed", icon: Home },
+                      { id: "payments", label: "Payments", icon: Receipt },
+                      { id: "ledger", label: "Ledger", icon: CreditCard },
+                      { id: "complaints", label: "Complaints", icon: MessageSquare },
+                      { id: "electricity", label: "Electricity", icon: Zap },
+                    ].map((tab) => {
+                      const Icon = tab.icon;
+                      const isActive = activeTab === tab.id;
+                      return (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                          className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-all text-left mb-0.5 ${
+                            isActive
+                              ? "bg-teal-600 text-white font-semibold shadow-sm"
+                              : "text-slate-600 hover:bg-slate-100 hover:text-slate-900 font-medium"
+                          }`}>
+                          <Icon className="h-4 w-4 shrink-0" />{tab.label}
+                        </button>
+                      );
+                    })}
+                  </nav>
+
+                  {/* Footer actions */}
+                  <div className="p-3 border-t border-slate-200 space-y-2">
+                    <Link href={`/admin/bed-transfers?guest=${detailGuest.id}`}
+                      className="flex items-center justify-center gap-2 w-full h-9 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors">
+                      <ArrowRightLeft className="h-3.5 w-3.5" /> Transfer Room/Bed
+                    </Link>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button disabled={deactivatingId === detailGuest.id}
+                          className="flex items-center justify-center gap-2 w-full h-9 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-semibold rounded-lg transition-colors border border-red-200">
+                          {deactivatingId === detailGuest.id ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UserX className="h-3.5 w-3.5" />}
+                          Deactivate Guest
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Deactivate Guest?</AlertDialogTitle>
+                          <AlertDialogDescription>This will free their bed and mark them as inactive. This action cannot be undone.</AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancel</AlertDialogCancel>
+                          <AlertDialogAction onClick={() => handleDeactivate(detailGuest.id)} className="bg-red-600 hover:bg-red-700">Deactivate</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  </div>
+                </div>
+
+                {/* Right content panel */}
+                <div className="flex-1 flex flex-col bg-white min-w-0 overflow-hidden">
+                  {/* Top bar */}
+                  <div className="h-14 border-b border-slate-100 flex items-center justify-between px-6 shrink-0 bg-white">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 capitalize">
+                        {["personal","emergency","job","documents","room","payments","ledger","complaints","electricity"].includes(activeTab)
+                          ? { personal: "Personal Info", emergency: "Emergency Contacts", job: "Job Details", documents: "KYC Documents", room: "Room & Bed", payments: "Payments", ledger: "Ledger", complaints: "Complaints", electricity: "Electricity" }[activeTab]
+                          : activeTab}
+                      </h3>
+                      <p className="text-[11px] text-slate-400 mt-0.5">{detailGuest.email}</p>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="outline" size="sm" onClick={() => openEdit(detailGuest as unknown as GuestSummary)}
+                        className="h-8 px-3 text-xs rounded-lg border-slate-200 hover:border-teal-300 hover:text-teal-700 font-medium">
+                        <Pencil className="h-3.5 w-3.5 mr-1.5" /> Edit Profile
+                      </Button>
+                      <Button variant="outline" size="sm"
+                        onClick={() => { const doc = generateGuestPDF(detailGuest as unknown as Parameters<typeof generateGuestPDF>[0]); doc.save(`guest-profile-${detailGuest.name.replace(/\s+/g, "-").toLowerCase()}.pdf`); }}
+                        className="h-8 px-3 text-xs rounded-lg border-slate-200 font-medium">
+                        <Download className="h-3.5 w-3.5 mr-1.5" /> PDF
+                      </Button>
+                      <button onClick={() => setDetailGuest(null)}
+                        className="h-8 w-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition-colors ml-1">
+                        <X className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                  {/* Scrollable tab content */}
+                  <div className="flex-1 overflow-y-auto bg-slate-50/60 p-6">
+                    <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-6 min-h-full">
+                      {activeTab === "personal" && <PersonalTab guest={detailGuest} />}
+                      {activeTab === "emergency" && <EmergencyTab guest={detailGuest} />}
+                      {activeTab === "job" && <JobTab guest={detailGuest} />}
+                      {activeTab === "documents" && <DocumentsTab guest={detailGuest} onViewImage={setViewImage} />}
+                      {activeTab === "room" && <RoomTab guest={detailGuest} />}
+                      {activeTab === "payments" && <PaymentsTab guest={detailGuest} onViewImage={setViewImage} onRefresh={() => openDetail(detailGuest.id)} />}
+                      {activeTab === "ledger" && <LedgerTab guest={detailGuest} />}
+                      {activeTab === "complaints" && <ComplaintsTab guest={detailGuest} />}
+                      {activeTab === "electricity" && <ElectricityTab guest={detailGuest} />}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : null}
+          </div>
+
+          {/* ══════════════ MOBILE SHEET ══════════════ */}
+          <div className="md:hidden fixed inset-x-0 bottom-0 h-[93dvh] bg-white rounded-t-3xl shadow-2xl flex flex-col overflow-hidden">
+            {detailLoading ? (
+              <div className="flex-1 flex items-center justify-center">
+                <Loader2 className="h-8 w-8 text-teal-500 animate-spin" />
+              </div>
+            ) : detailGuest ? (
+              <>
+                {/* Mobile header */}
+                <div className="shrink-0 px-4 pt-3 pb-3 border-b border-slate-100 bg-white">
+                  <div className="w-10 h-1 bg-slate-200 rounded-full mx-auto mb-3" />
+                  <div className="flex items-center gap-3">
                     {detailGuest.onboardingData?.step4Documents?.photo ? (
-                      <img
-                        src={detailGuest.onboardingData.step4Documents.photo}
-                        alt={detailGuest.name}
-                        className="w-20 h-20 rounded-2xl object-cover border-2 border-white shadow-sm"
-                      />
+                      <img src={detailGuest.onboardingData.step4Documents.photo} alt={detailGuest.name}
+                        className="w-12 h-12 rounded-xl object-cover border border-slate-200 shadow-sm shrink-0" />
                     ) : (
-                      <div className="w-20 h-20 rounded-2xl bg-teal-100 flex items-center justify-center text-2xl font-bold text-teal-700 border-2 border-white shadow-sm">
-                        {detailGuest.name[0]}
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-600 flex items-center justify-center text-lg font-bold text-white shrink-0">
+                        {detailGuest.name[0].toUpperCase()}
                       </div>
                     )}
-                    <span className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-[3px] border-slate-50 ${
-                      detailGuest.status === "Active" ? "bg-emerald-500" :
-                      detailGuest.status === "Notice Period" ? "bg-amber-500" :
-                      detailGuest.status === "Inactive" ? "bg-slate-400" : "bg-blue-500"
-                    }`} />
+                    <div className="min-w-0 flex-1">
+                      <h2 className="text-base font-bold text-slate-900 truncate leading-tight">{detailGuest.name}</h2>
+                      <p className="text-xs text-slate-500">{detailGuest.mobile}</p>
+                      <div className="flex items-center gap-1.5 mt-1">
+                        <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold ${
+                          detailGuest.status === "Active" ? "bg-emerald-100 text-emerald-700" :
+                          detailGuest.status === "Notice Period" ? "bg-amber-100 text-amber-700" : "bg-slate-100 text-slate-600"
+                        }`}>{detailGuest.status}</span>
+                        {detailGuest.room && <span className="text-[10px] text-slate-400">{detailGuest.room.name} · Bed {detailGuest.bed?.name}</span>}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button onClick={() => openEdit(detailGuest as unknown as GuestSummary)}
+                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                        <Pencil className="h-3.5 w-3.5" />
+                      </button>
+                      <button onClick={() => setDetailGuest(null)}
+                        className="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600">
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </div>
-                  <h2 className="text-center text-base font-bold text-slate-900 truncate">{detailGuest.name}</h2>
-                  <div className="flex justify-center mt-2">
-                    <Badge variant="outline" className={`rounded-full text-[10px] font-medium ${STATUS_COLORS[detailGuest.status] || "bg-slate-100 text-slate-600"}`}>
-                      {detailGuest.status}
-                    </Badge>
-                  </div>
-                  <div className="mt-3 space-y-1 text-center">
-                    <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
-                      <Phone className="h-3 w-3" /> {detailGuest.mobile}
-                    </p>
-                    <p className="text-xs text-slate-500 flex items-center justify-center gap-1 truncate px-2">
-                      <Mail className="h-3 w-3 shrink-0" /> {detailGuest.email}
-                    </p>
+                  {/* Mobile stat row */}
+                  <div className="grid grid-cols-3 gap-2 mt-3">
+                    <div className="bg-slate-50 rounded-lg px-2 py-1.5 text-center border border-slate-100">
+                      <p className="text-[9px] text-slate-400 uppercase tracking-wide font-medium">Room</p>
+                      <p className="text-xs font-bold text-slate-800 mt-0.5">{detailGuest.room?.name || "—"}</p>
+                    </div>
+                    <div className="bg-slate-50 rounded-lg px-2 py-1.5 text-center border border-slate-100">
+                      <p className="text-[9px] text-slate-400 uppercase tracking-wide font-medium">Bed</p>
+                      <p className="text-xs font-bold text-slate-800 mt-0.5">{detailGuest.bed?.name || "—"}</p>
+                    </div>
+                    <div className={`rounded-lg px-2 py-1.5 text-center border ${detailGuest.ledger.reduce((s,l) => s+l.due, 0) > 0 ? "bg-red-50 border-red-200" : "bg-emerald-50 border-emerald-200"}`}>
+                      <p className="text-[9px] text-slate-400 uppercase tracking-wide font-medium">Due</p>
+                      <p className={`text-xs font-bold mt-0.5 ${detailGuest.ledger.reduce((s,l) => s+l.due, 0) > 0 ? "text-red-700" : "text-emerald-700"}`}>
+                        {formatCurrency(detailGuest.ledger.reduce((s, l) => s + l.due, 0))}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Navigation */}
-                <div className="flex-1 overflow-y-auto py-2">
-                  {[
-                    { id: "personal", label: "Personal Details", icon: User },
-                    { id: "emergency", label: "Emergency Contacts", icon: Shield },
-                    { id: "job", label: "Job Details", icon: Briefcase },
-                    { id: "documents", label: "KYC Documents", icon: FileImage },
-                    { id: "room", label: "Room Info", icon: Home },
-                    { id: "payments", label: "Payments", icon: Receipt },
-                    { id: "ledger", label: "Ledger", icon: CreditCard },
-                    { id: "complaints", label: "Complaints", icon: MessageSquare },
-                    { id: "electricity", label: "Electricity", icon: Zap },
-                  ].map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors text-left mx-1 rounded-lg ${
-                        activeTab === tab.id
-                          ? "bg-white text-teal-700 shadow-sm"
-                          : "text-slate-500 hover:text-slate-700 hover:bg-white/60"
-                      }`}
-                    >
-                      <tab.icon className="h-4 w-4 shrink-0" />
-                      {tab.label}
-                    </button>
-                  ))}
+                {/* Mobile tab bar */}
+                <div className="shrink-0 bg-white border-b border-slate-100">
+                  <div className="flex gap-1 overflow-x-auto px-3 py-2.5" style={{ scrollbarWidth: "none" }}>
+                    {[
+                      { id: "personal", label: "Personal", icon: User },
+                      { id: "emergency", label: "Emergency", icon: Shield },
+                      { id: "job", label: "Job", icon: Briefcase },
+                      { id: "documents", label: "KYC", icon: FileImage },
+                      { id: "room", label: "Room", icon: Home },
+                      { id: "payments", label: "Payments", icon: Receipt },
+                      { id: "ledger", label: "Ledger", icon: CreditCard },
+                      { id: "complaints", label: "Issues", icon: MessageSquare },
+                      { id: "electricity", label: "Electric", icon: Zap },
+                    ].map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <button key={tab.id} onClick={() => setActiveTab(tab.id)}
+                          className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[11px] font-semibold whitespace-nowrap transition-all shrink-0 ${
+                            activeTab === tab.id
+                              ? "bg-teal-600 text-white shadow-sm"
+                              : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                          }`}>
+                          <Icon className="h-3 w-3" />{tab.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                {/* Quick Actions */}
-                <div className="p-4 border-t border-slate-200 space-y-2">
-                  <Button size="sm" variant="outline" asChild className="w-full rounded-xl text-xs h-9 justify-start">
-                    <Link href={`/admin/bed-transfers?guest=${detailGuest.id}`}>
-                      <ArrowRightLeft className="h-3.5 w-3.5 mr-2" /> Transfer Room/Bed
-                    </Link>
-                  </Button>
+                {/* Mobile scrollable content */}
+                <div className="flex-1 overflow-y-auto bg-slate-50/60 p-3">
+                  <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
+                    {activeTab === "personal" && <PersonalTab guest={detailGuest} />}
+                    {activeTab === "emergency" && <EmergencyTab guest={detailGuest} />}
+                    {activeTab === "job" && <JobTab guest={detailGuest} />}
+                    {activeTab === "documents" && <DocumentsTab guest={detailGuest} onViewImage={setViewImage} />}
+                    {activeTab === "room" && <RoomTab guest={detailGuest} />}
+                    {activeTab === "payments" && <PaymentsTab guest={detailGuest} onViewImage={setViewImage} onRefresh={() => openDetail(detailGuest.id)} />}
+                    {activeTab === "ledger" && <LedgerTab guest={detailGuest} />}
+                    {activeTab === "complaints" && <ComplaintsTab guest={detailGuest} />}
+                    {activeTab === "electricity" && <ElectricityTab guest={detailGuest} />}
+                  </div>
+                </div>
+
+                {/* Mobile action bar */}
+                <div className="shrink-0 bg-white border-t border-slate-100 px-4 py-3 flex gap-3">
+                  <Link href={`/admin/bed-transfers?guest=${detailGuest.id}`}
+                    className="flex-1 flex items-center justify-center gap-2 h-11 bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-semibold rounded-xl transition-colors">
+                    <ArrowRightLeft className="h-4 w-4" /> Transfer
+                  </Link>
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        disabled={deactivatingId === detailGuest.id}
-                        className="w-full rounded-xl text-xs h-9 justify-start text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
-                      >
-                        {deactivatingId === detailGuest.id ? <Loader2 className="h-3.5 w-3.5 mr-2 animate-spin" /> : <UserX className="h-3.5 w-3.5 mr-2" />}
-                        Deactivate Guest
-                      </Button>
+                      <button disabled={deactivatingId === detailGuest.id}
+                        className="flex-1 flex items-center justify-center gap-2 h-11 bg-red-50 hover:bg-red-100 text-red-600 text-sm font-semibold rounded-xl transition-colors border border-red-200">
+                        {deactivatingId === detailGuest.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserX className="h-4 w-4" />}
+                        Deactivate
+                      </button>
                     </AlertDialogTrigger>
                     <AlertDialogContent>
                       <AlertDialogHeader>
                         <AlertDialogTitle>Deactivate Guest?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                          This will free their bed and mark them as inactive. This action cannot be undone.
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>This will free their bed and mark them inactive.</AlertDialogDescription>
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeactivate(detailGuest.id)} className="bg-red-600 hover:bg-red-700">
-                          Deactivate
-                        </AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleDeactivate(detailGuest.id)} className="bg-red-600 hover:bg-red-700">Deactivate</AlertDialogAction>
                       </AlertDialogFooter>
                     </AlertDialogContent>
                   </AlertDialog>
                 </div>
-              </div>
-
-              {/* ── Right Content ── */}
-              <div className="flex-1 flex flex-col bg-white min-w-0">
-                {/* Top Bar */}
-                <div className="h-14 border-b border-slate-100 flex items-center justify-between px-6 shrink-0">
-                  <h3 className="text-sm font-semibold text-slate-700 capitalize">
-                    {activeTab.replace("-", " ")} Details
-                  </h3>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => openEdit(detailGuest as unknown as GuestSummary)}
-                      className="rounded-full text-xs h-8"
-                    >
-                      <Pencil className="h-3 w-3 mr-1.5" /> Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        const doc = generateGuestPDF(detailGuest as unknown as Parameters<typeof generateGuestPDF>[0]);
-                        doc.save(`guest-profile-${detailGuest.name.replace(/\s+/g, "-").toLowerCase()}.pdf`);
-                      }}
-                      className="rounded-full text-xs h-8"
-                    >
-                      <Download className="h-3 w-3 mr-1.5" /> PDF
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-8">
-                  {activeTab === "personal" && <PersonalTab guest={detailGuest} />}
-                  {activeTab === "emergency" && <EmergencyTab guest={detailGuest} />}
-                  {activeTab === "job" && <JobTab guest={detailGuest} />}
-                  {activeTab === "documents" && <DocumentsTab guest={detailGuest} onViewImage={setViewImage} />}
-                  {activeTab === "room" && <RoomTab guest={detailGuest} />}
-                  {activeTab === "payments" && <PaymentsTab guest={detailGuest} onViewImage={setViewImage} onRefresh={() => openDetail(detailGuest.id)} />}
-                  {activeTab === "ledger" && <LedgerTab guest={detailGuest} />}
-                  {activeTab === "complaints" && <ComplaintsTab guest={detailGuest} />}
-                  {activeTab === "electricity" && <ElectricityTab guest={detailGuest} />}
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </SheetContent>
-      </Sheet>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
 
       {/* ─── Edit Drawer ─────────────────────────────────────────────── */}
       <Sheet open={!!editGuest} onOpenChange={(open) => { if (!open) setEditGuest(null); }}>

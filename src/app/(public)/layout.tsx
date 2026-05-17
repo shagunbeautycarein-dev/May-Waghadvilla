@@ -1,6 +1,7 @@
 import { Navbar } from "@/components/public/navbar";
 import { Footer } from "@/components/public/footer";
-import { FloatingActionButtons } from "@/components/public/floating-buttons";
+import { ContactFAB } from "@/components/public/contact-fab";
+import { CTAPopup } from "@/components/public/cta-popup";
 import { getCmsSettings } from "@/lib/cms";
 
 export default async function PublicLayout({
@@ -16,7 +17,8 @@ export default async function PublicLayout({
       <Navbar logoUrl={logoUrl} />
       <main>{children}</main>
       <Footer />
-      <FloatingActionButtons />
+      <ContactFAB />
+      <CTAPopup />
     </div>
   );
 }

@@ -22,6 +22,7 @@ export function CloudinaryUpload({
   hidePreview = false,
 }: CloudinaryUploadProps) {
   const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const handleUploadClick = () => {
@@ -33,11 +34,12 @@ export function CloudinaryUpload({
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    setError(null);
     const uploadedUrls: string[] = [];
 
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
     if (!cloudName) {
-      alert("Cloudinary configuration missing");
+      setError("Cloudinary configuration missing");
       setUploading(false);
       return;
     }
@@ -52,23 +54,26 @@ export function CloudinaryUpload({
         formData.append("upload_preset", "waghad_villa_unsigned");
         formData.append("folder", folder);
 
-        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
+        const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
           method: "POST",
           body: formData,
         });
 
-        if (res.ok) {
-          const data = await res.json();
-          uploadedUrls.push(data.secure_url);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error?.message || "Upload failed");
         }
+
+        const data = await res.json();
+        uploadedUrls.push(data.secure_url);
       }
 
       if (uploadedUrls.length > 0) {
         onChange([...images, ...uploadedUrls]);
       }
-    } catch (error) {
-      console.error("Upload error:", error);
-      alert("Failed to upload image(s)");
+    } catch (err: any) {
+      console.error("Cloudinary upload error:", err);
+      setError(err.message || "Failed to upload image. Please try again.");
     } finally {
       setUploading(false);
       // Reset input so the same file can be selected again if needed
@@ -132,6 +137,12 @@ export function CloudinaryUpload({
             {uploading ? "Uploading..." : `Upload Image${maxFiles > 1 ? "s" : ""}`}
           </Button>
         </>
+      )}
+
+      {error && (
+        <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-600">
+          {error}
+        </div>
       )}
 
       <p className="text-xs text-slate-400">

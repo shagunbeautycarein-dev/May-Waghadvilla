@@ -81,15 +81,9 @@ export function AdminHeader({ admin }: { admin: { name: string; email: string } 
     <>
       {/* Desktop + Mobile Header */}
       <header className="h-16 bg-white border-b border-slate-100 flex items-center justify-between px-4 md:px-6 shrink-0 sticky top-0 z-30">
-        {/* Left: Hamburger (mobile) + Page Title */}
+        {/* Left: Page Title (Margin left on mobile to avoid fixed hamburger from sidebar) */}
         <div className="flex items-center gap-3">
-          <button
-            className="md:hidden p-2 rounded-xl text-slate-600 hover:bg-slate-100 transition-colors"
-            onClick={() => setDrawerOpen(true)}
-          >
-            <Menu className="w-5 h-5" />
-          </button>
-          <div>
+          <div className="ml-12 md:ml-0">
             <p className="text-sm font-semibold text-slate-900 md:text-base">
               {getPageTitle(pathname)}
             </p>
@@ -115,81 +109,7 @@ export function AdminHeader({ admin }: { admin: { name: string; email: string } 
         </div>
       </header>
 
-      {/* Mobile Drawer */}
-      {drawerOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => setDrawerOpen(false)}
-          />
-          {/* Drawer */}
-          <aside className="relative w-72 max-w-[85vw] bg-slate-900 h-full flex flex-col shadow-2xl">
-            {/* Brand */}
-            <div className="h-16 flex items-center justify-between px-5 border-b border-white/10">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <p className="text-sm font-bold text-white">The Waghad Villa</p>
-                  <p className="text-[10px] text-slate-400 uppercase tracking-wider">Admin</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setDrawerOpen(false)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-white/10"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Nav Items */}
-            <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-0.5">
-              {allNavItems.map((item) => {
-                const Icon = item.icon;
-                const active = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setDrawerOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all",
-                      active
-                        ? "bg-emerald-500/10 text-emerald-400"
-                        : "text-slate-400 hover:text-white hover:bg-white/5"
-                    )}
-                  >
-                    <Icon className="w-4 h-4 shrink-0" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-
-            {/* Footer */}
-            <div className="p-3 border-t border-white/10">
-              <div className="flex items-center gap-3 px-3 py-2">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center text-xs font-bold text-white">
-                  {admin.name[0]}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-white truncate">{admin.name}</p>
-                  <p className="text-xs text-slate-500 truncate">{admin.email}</p>
-                </div>
-              </div>
-              <button
-                onClick={handleLogout}
-                className="mt-2 w-full flex items-center gap-2 px-3 py-2.5 rounded-xl text-sm text-red-400 hover:bg-red-400/10 transition-all"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
-            </div>
-          </aside>
-        </div>
-      )}
+      {/* Drawer removed: Now handled centrally by admin-sidebar.tsx */}
 
       {/* Mobile Bottom Navigation */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-100 safe-area-pb">

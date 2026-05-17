@@ -5,7 +5,7 @@ import { generateSEO } from "@/lib/seo";
 export const metadata = generateSEO({
   title: "About Us",
   description:
-    "Learn about The Waghad Villa â€” premium PG accommodation in Ambawadi Ahmedabad for students and working professionals.",
+    "Learn about The Waghad Villa — premium PG accommodation in Ambawadi Ahmedabad for students and working professionals.",
   path: "/about",
 });
 
@@ -94,12 +94,12 @@ export default async function AboutPage() {
             Ahmedabad, The Waghad Villa offers easy access to major landmarks:
           </p>
           <ul className="space-y-2 text-sm text-slate-700">
-            <li>â€¢ Vijay Cross Road â€” 1.2 km</li>
-            <li>â€¢ Law Garden â€” 1.5 km</li>
-            <li>â€¢ CG Road â€” 2.0 km</li>
-            <li>â€¢ Ellisbridge â€” 1.8 km</li>
-            <li>â€¢ Paldi Station â€” 2.8 km</li>
-            <li>â€¢ Gujarat University â€” 3.5 km</li>
+            <li>• Vijay Cross Road — 1.2 km</li>
+            <li>• Law Garden — 1.5 km</li>
+            <li>• CG Road — 2.0 km</li>
+            <li>• Ellisbridge — 1.8 km</li>
+            <li>• Paldi Station — 2.8 km</li>
+            <li>• Gujarat University — 3.5 km</li>
           </ul>
         </div>
       </div>

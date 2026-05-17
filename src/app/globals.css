@@ -107,6 +107,8 @@
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+
+  --spacing-safe: env(safe-area-inset-bottom);
 }
 
 :root {
@@ -156,11 +158,23 @@
   * {
     @apply border-border outline-ring/50;
   }
-  body {
-    @apply bg-background text-foreground antialiased selection:bg-brand-100 selection:text-brand-900;
-  }
   html {
     scroll-behavior: smooth;
+    overscroll-behavior-y: none;
+  }
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button, a, [role="button"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  body {
+    @apply bg-background text-foreground antialiased selection:bg-brand-100 selection:text-brand-900;
+    overflow-x: hidden;
   }
 }
 

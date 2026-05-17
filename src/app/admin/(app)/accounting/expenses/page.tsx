@@ -444,7 +444,7 @@ export default function ExpensesPage() {
                   </span>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <div className="w-full overflow-x-auto"><table className="w-full text-sm whitespace-nowrap">
                     <tbody className="divide-y divide-slate-50">
                       {dayExpenses.map((e) => {
                         const cat = e.expenseCategory || categoryMap[e.categoryId || ""];
@@ -496,7 +496,7 @@ export default function ExpensesPage() {
                         );
                       })}
                     </tbody>
-                  </table>
+                  </table></div>
                 </div>
               </div>
             ))}
