@@ -4,6 +4,9 @@ import { safeQuery } from "@/lib/db-safe";
 import { getCmsSettings } from "@/lib/cms";
 import { generateSEO } from "@/lib/seo";
 import Script from "next/script";
+
+export const dynamic = "force-dynamic";
+
 import { siteConfig } from "@/config/site";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -601,4 +604,4 @@ export default async function HomePage() {
   </>);
 }
 
-export const dynamic = "force-dynamic";
+

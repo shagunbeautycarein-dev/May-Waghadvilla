@@ -1,3 +1,4 @@
+import { unstable_noStore } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/db-safe";
 
@@ -24,6 +25,7 @@ const CMS_KEYS = [
 export type CmsSettings = Record<string, string>;
 
 export async function getCmsSettings(): Promise<CmsSettings> {
+  unstable_noStore();
   const settings = await safeQuery(
     async () =>
       prisma.setting.findMany({
