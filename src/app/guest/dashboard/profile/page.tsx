@@ -58,12 +58,23 @@ export default function GuestProfilePage() {
   useEffect(() => {
     async function load() {
       try {
+        // Try Supabase auth first
         const { data: sessionData } = await getGuestSession();
         const email = sessionData.session?.user?.email;
-        if (!email) return;
+        if (email) {
+          const res = await fetch(`/api/guest/profile?email=${encodeURIComponent(email)}`);
+          if (res.ok) {
+            setGuest(await res.json());
+            return;
+          }
+        }
 
-        const res = await fetch(`/api/guest/profile?email=${encodeURIComponent(email)}`);
-        if (res.ok) setGuest(await res.json());
+        // Fallback: custom guest_session cookie
+        const res = await fetch("/api/guest/me");
+        if (res.ok) {
+          setGuest(await res.json());
+          return;
+        }
       } catch {
         // silent
       } finally {
