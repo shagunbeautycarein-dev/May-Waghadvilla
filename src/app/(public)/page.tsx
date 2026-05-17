@@ -3,7 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/db-safe";
 import { getCmsSettings } from "@/lib/cms";
 import { generateSEO } from "@/lib/seo";
+import { localBusinessSchema, faqSchema } from "@/lib/schema";
 import Script from "next/script";
+import Image from "next/image";
 
 export const dynamic = "force-dynamic";
 
@@ -169,47 +171,47 @@ export default async function HomePage() {
   const heroTagline = cms["cms_hero_tagline"] || "âœ¨ Premium Living Experience in Ahmedabad";
   const heroSubtitle = cms["cms_hero_subtitle"] || "Experience the perfect blend of comfort and community at The Waghad Villa. Premium AC rooms, high-speed WiFi, and homely meals in the heart of Ambawadi.";
 
-  const structuredData = {
-    "@context": "https://schema.org",
-    "@type": "LodgingBusiness",
-    name: "The Waghad Villa",
-    description:
-      "Premium PG in Ambawadi Ahmedabad for Students & Working Professionals",
-    url: siteConfig.url,
-    telephone: siteConfig.contact.phone,
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Ambawadi",
-      addressLocality: "Ahmedabad",
-      addressRegion: "Gujarat",
-      postalCode: "380006",
-      addressCountry: "IN",
-    },
-    priceRange: "Rs.6500 - Rs.18000",
-    amenityFeature: [
-      { "@type": "LocationFeatureSpecification", name: "WiFi" },
-      { "@type": "LocationFeatureSpecification", name: "Air Conditioning" },
-      { "@type": "LocationFeatureSpecification", name: "Meals" },
-      { "@type": "LocationFeatureSpecification", name: "Laundry" },
-    ],
-  };
-
   return (
     <>
-      <Script
-        id="structured-data"
+      <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema()) }}
       />
-      <div className="flex flex-col min-h-screen bg-slate-50/30">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            faqSchema([
+              { question: 'What is the rent for PG in Ambawadi?', answer: 'Rent starts from ₹6,500 per month.' },
+              { question: 'Is food included?', answer: 'Yes, all packages include breakfast, lunch, and dinner.' },
+              { question: 'Is WiFi available?', answer: 'Yes, high-speed broadband is included.' },
+              { question: 'Is it safe for girls?', answer: 'Yes, we have 24/7 CCTV and security guard.' },
+              { question: 'How to book a visit?', answer: 'Click Book Visit on our website or call us directly.' },
+              { question: 'What documents are needed?', answer: 'Aadhaar card, one photo, and local reference.' },
+              { question: 'Is AC available in all rooms?', answer: 'Yes, all rooms are fully air-conditioned.' },
+              { question: 'How is electricity calculated?', answer: 'Fair per-bed billing based on actual usage.' },
+              { question: 'Can I pay rent online?', answer: 'Yes, via UPI. Upload screenshot for admin approval.' },
+              { question: 'What is the notice period?', answer: '30 days notice is required before leaving.' },
+              { question: 'Is laundry included?', answer: 'Yes, weekly washing and ironing service is included.' },
+              { question: 'Are there any hidden charges?', answer: 'No. All charges are transparent in your digital ledger.' },
+              { question: 'Can I get a single room?', answer: 'Yes, we offer single, double, and triple sharing options.' },
+              { question: 'Is parking available?', answer: 'Two-wheeler parking is available.' },
+              { question: 'How far from Gujarat University?', answer: 'Approximately 10 minutes by auto-rickshaw.' },
+            ])
+          ),
+        }}
+      />
+      <main className="flex flex-col min-h-screen bg-slate-50/30">
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <header aria-label="Hero" className="relative min-h-[90vh] flex items-center overflow-hidden">
         {/* Background Image with Overlay */}
         <div className="absolute inset-0 z-0">
-          <img
+          <Image
+            priority
+            fill
             src={heroImage}
-            alt="The Waghad Villa"
-            className="w-full h-full object-cover"
+            alt="The Waghad Villa Hero"
+            className="object-cover"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-[#1F2937]/90 via-[#1F2937]/60 to-transparent" />
         </div>
@@ -273,10 +275,10 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
+      </header>
 
       {/* Amenities Section - Bento Grid Style */}
-      <section className="py-24 relative overflow-hidden">
+      <section aria-label="Amenities" className="py-24 relative overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
             <div className="max-w-2xl">
@@ -313,7 +315,7 @@ export default async function HomePage() {
       </section>
 
       {/* Featured Rooms Section */}
-      <section className="py-24 bg-white dark:bg-[#171A1C]">
+      <section aria-label="Featured Rooms" className="py-24 bg-white dark:bg-[#171A1C]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Curated Stays</h2>
@@ -336,10 +338,11 @@ export default async function HomePage() {
                     className="group bg-white dark:bg-[#2D3235] rounded-[2.5rem] border border-slate-100 dark:border-slate-800 shadow-lg overflow-hidden transition-all hover:shadow-2xl block"
                   >
                     <div className="relative h-72 overflow-hidden">
-                      <img
+                      <Image
+                        fill
                         src={imageSrc}
-                        alt={room.name}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        alt={`Room ${room.name} at ${siteConfig.name}`}
+                        className="object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                       <div className="absolute top-4 left-4 flex gap-2">
                         <Badge className="bg-emerald-500 text-white border-none px-3 py-1 rounded-full">
@@ -416,7 +419,7 @@ export default async function HomePage() {
       </section>
 
       {/* Location & Map Section */}
-      <section className="py-24 bg-slate-50 dark:bg-[#2D3235]/50">
+      <section aria-label="Location" className="py-24 bg-slate-50 dark:bg-[#2D3235]/50">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
             <div>
@@ -461,7 +464,7 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-24 bg-white dark:bg-[#171A1C] overflow-hidden">
+      <section aria-label="Reviews" className="py-24 bg-white dark:bg-[#171A1C] overflow-hidden">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Testimonials</h2>
@@ -542,8 +545,36 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Why Choose Us */}
+      <section aria-label="Why Choose Us" className="py-16 bg-white dark:bg-[#171A1C]">
+        <div className="max-w-4xl mx-auto px-4">
+          <h2 className="text-3xl font-bold text-center mb-10 text-slate-900 dark:text-white">Why Choose {siteConfig.name}?</h2>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-teal-50 dark:bg-teal-900/30">
+                  <th className="p-4 text-left border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">Feature</th>
+                  <th className="p-4 text-center border border-slate-200 dark:border-slate-700 text-teal-700 dark:text-teal-400">{siteConfig.name}</th>
+                  <th className="p-4 text-center border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">Other PGs</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Rent Transparency</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ Digital ledger, no hidden charges</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Manual notebooks</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">AC Rooms</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ All rooms</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">⚠️ Extra charge or non-AC</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Food</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ Homely meals included</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Mess food or self-cooking</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">WiFi</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ High-speed unlimited</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">⚠️ Limited or slow</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Security</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ 24/7 CCTV + Guard</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Limited</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Laundry</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ Included</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Pay per use</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Electricity</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ Fair per-bed split</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Equal split even if bed empty</td></tr>
+                <tr><td className="p-4 border border-slate-200 dark:border-slate-700">Complaints</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">✅ App-based tracking</td><td className="p-4 border border-slate-200 dark:border-slate-700 text-center">❌ Word of mouth</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
       {/* FAQ Section */}
-      <section className="py-24 bg-white dark:bg-[#171A1C]">
+      <section aria-label="FAQ" className="py-24 bg-white dark:bg-[#171A1C]">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4">Support</h2>
@@ -600,8 +631,9 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
-    </div>
-  </>);
+    </main>
+    </>
+  );
 }
 
 

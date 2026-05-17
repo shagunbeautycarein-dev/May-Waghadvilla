@@ -17,7 +17,7 @@ export function CloudinaryUpload({
   images,
   onChange,
   maxFiles = 5,
-  folder = "wahad-villa",
+  folder = "waghad-villa",
   accept,
   hidePreview = false,
 }: CloudinaryUploadProps) {
@@ -49,7 +49,7 @@ export function CloudinaryUpload({
       for (const file of filesToUpload) {
         const formData = new FormData();
         formData.append("file", file);
-        formData.append("upload_preset", "wahad_villa_unsigned");
+        formData.append("upload_preset", "waghad_villa_unsigned");
         formData.append("folder", folder);
 
         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {

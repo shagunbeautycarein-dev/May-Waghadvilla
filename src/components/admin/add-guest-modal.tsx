@@ -488,7 +488,7 @@ export function AddGuestModal({ open, onOpenChange, onSuccess }: Props) {
                 images={idImage ? [idImage] : []}
                 onChange={(urls) => setIdImage(urls[0] || "")}
                 maxFiles={1}
-                folder="wahad-villa/documents"
+                folder="waghad-villa/documents"
               />
             </div>
             <div className="border-t border-slate-100 pt-4 space-y-4">
@@ -518,7 +518,7 @@ export function AddGuestModal({ open, onOpenChange, onSuccess }: Props) {
                   images={paymentProof ? [paymentProof] : []}
                   onChange={(urls) => setPaymentProof(urls[0] || "")}
                   maxFiles={1}
-                  folder="wahad-villa/payments"
+                  folder="waghad-villa/payments"
                 />
               </div>
             </div>

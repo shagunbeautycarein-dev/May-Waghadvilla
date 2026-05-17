@@ -223,7 +223,7 @@ export default function GuestComplaintsPage() {
                   images={images}
                   onChange={setImages}
                   maxFiles={3}
-                  folder="wahad-villa/complaints"
+                  folder="waghad-villa/complaints"
                 />
               </div>
 

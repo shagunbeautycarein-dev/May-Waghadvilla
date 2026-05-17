@@ -10,6 +10,9 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SHARING_TYPES } from "@/lib/constants";
 import { Filter, X, BedDouble } from "lucide-react";
+import { breadcrumbSchema } from "@/lib/schema";
+import { siteConfig } from "@/config/site";
+import Image from "next/image";
 
 interface Room {
   id: string;
@@ -200,6 +203,18 @@ export default function RoomsPage() {
   );
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbSchema([
+              { name: 'Home', url: siteConfig.url },
+              { name: 'Rooms', url: `${siteConfig.url}/rooms` },
+            ])
+          ),
+        }}
+      />
     <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-10 text-center">
         <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
@@ -290,10 +305,11 @@ export default function RoomsPage() {
                   >
                     <div className="bg-slate-100 h-48 rounded-xl overflow-hidden relative">
                       {imageSrc ? (
-                        <img
+                        <Image
+                          fill
                           src={imageSrc}
                           alt={room.name}
-                          className="w-full h-full object-cover"
+                          className="object-cover"
                         />
                       ) : (
                         <div className="w-full h-full flex items-center justify-center">
@@ -357,5 +373,6 @@ export default function RoomsPage() {
         </div>
       </div>
     </div>
+    </>
   );
 }

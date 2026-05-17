@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { RoomImageGallery } from "@/components/public/room-image-gallery";
 import { BedDouble, Wifi, Utensils, Zap, MapPin, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { productSchema, breadcrumbSchema } from "@/lib/schema";
+import { siteConfig } from "@/config/site";
 
 interface RoomDetailPageProps {
   params: Promise<{ id: string }>;
@@ -35,6 +37,23 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
   const minRent = room.beds.length > 0 ? Math.min(...room.beds.map((b) => Number(b.rent))) : null;
 
   return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema({ ...room, minRent })) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(
+            breadcrumbSchema([
+              { name: 'Home', url: siteConfig.url },
+              { name: 'Rooms', url: `${siteConfig.url}/rooms` },
+              { name: room.name, url: `${siteConfig.url}/rooms/${room.id}` },
+            ])
+          ),
+        }}
+      />
     <div className="min-h-screen bg-white">
       <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
         {/* Breadcrumb */}
@@ -181,5 +200,6 @@ export default async function RoomDetailPage({ params }: RoomDetailPageProps) {
         </div>
       </div>
     </div>
+    </>
   );
 }

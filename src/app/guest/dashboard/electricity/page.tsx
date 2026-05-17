@@ -268,7 +268,7 @@ export default function GuestElectricityPage() {
                   images={proofImage ? [proofImage] : []}
                   onChange={(urls) => setProofImage(urls[0] || "")}
                   maxFiles={1}
-                  folder="wahad-villa/payments"
+                  folder="waghad-villa/payments"
                 />
               </div>
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { getGuestSession } from "@/lib/supabase/auth";
 import Link from "next/link";
-import { Bed, Calendar, Shield, Zap, Clock, Receipt, ArrowDownLeft, ArrowUpRight, FileText, Bell, AlertTriangle, Bolt } from "lucide-react";
+import { Bed, Calendar, Shield, Zap, Clock, Receipt, ArrowDownLeft, ArrowUpRight, FileText, Bell, AlertTriangle, Bolt, ArrowRightLeft, LogOut, MessageSquare, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { generateReceiptPDF } from "@/lib/receipt-pdf";
 import { OnboardingWizard } from "@/components/onboarding/wizard";
@@ -53,11 +53,28 @@ interface Notifications {
   pendingElectricity: number;
 }
 
+interface TransferItem {
+  id: string;
+  status: string;
+  oldBed?: { name: string; room?: { name: string } } | null;
+  newBed?: { name: string; room?: { name: string } } | null;
+  effectiveDate?: string;
+}
+
+interface LeavingItem {
+  id: string;
+  status: string;
+  lastDate?: string;
+  reason?: string;
+}
+
 export default function GuestDashboardPage() {
   const [guest, setGuest] = useState<Guest | null>(null);
   const [ledger, setLedger] = useState<LedgerEntry[]>([]);
   const [payments, setPayments] = useState<PaymentEntry[]>([]);
   const [notifications, setNotifications] = useState<Notifications | null>(null);
+  const [transfer, setTransfer] = useState<TransferItem | null>(null);
+  const [leaving, setLeaving] = useState<LeavingItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [onboardingToken, setOnboardingToken] = useState("");
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -114,15 +131,27 @@ export default function GuestDashboardPage() {
           }
         }
 
-        const [ledgerRes, paymentsRes, notifRes] = await Promise.all([
+        const [ledgerRes, paymentsRes, notifRes, transferRes, leavingRes] = await Promise.all([
           fetch(`/api/guest/ledger?guestId=${guestData.id}`),
           fetch(`/api/guest/payments?guestId=${guestData.id}`),
           fetch("/api/guest/notifications"),
+          fetch("/api/guest/bed-transfers"),
+          fetch("/api/guest/leaving"),
         ]);
 
         if (ledgerRes.ok) setLedger(await ledgerRes.json());
         if (paymentsRes.ok) setPayments(await paymentsRes.json());
         if (notifRes.ok) setNotifications(await notifRes.json());
+        if (transferRes.ok) {
+          const transfers: TransferItem[] = await transferRes.json();
+          const pending = transfers.find((t) => t.status === "requested" || t.status === "approved");
+          setTransfer(pending || null);
+        }
+        if (leavingRes.ok) {
+          const requests: LeavingItem[] = await leavingRes.json();
+          const pending = requests.find((r) => r.status === "submitted" || r.status === "approved");
+          setLeaving(pending || null);
+        }
       } catch {
         // silent
       } finally {
@@ -331,31 +360,97 @@ export default function GuestDashboardPage() {
       </div>
 
       <div className="p-4 md:p-6 space-y-5">
-        {/* Notification Pills */}
-        {hasNotifications && (
-          <div className="flex flex-wrap gap-2">
-            {notifications!.unreadNotices > 0 && (
-              <Link href="/guest/dashboard/notices">
-                <span className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 border border-blue-100 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-blue-100 transition-colors">
-                  <Bell className="h-3 w-3" />
-                  {notifications!.unreadNotices} Unread Notice{notifications!.unreadNotices > 1 ? "s" : ""}
-                </span>
+        {/* Notification Alert Cards */}
+        {(hasNotifications || totalDue > 0 || transfer || leaving) && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            {totalDue > 0 && (
+              <Link href="/guest/dashboard/rent" className="block">
+                <div className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-xl px-4 py-3 hover:bg-red-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
+                    <Receipt className="h-4 w-4 text-red-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-red-800">Rent Due</p>
+                    <p className="text-xs text-red-600 truncate">{formatCurrency(totalDue)} outstanding</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-red-400 shrink-0" />
+                </div>
               </Link>
             )}
-            {notifications!.pendingComplaints > 0 && (
-              <Link href="/guest/dashboard/complaints">
-                <span className="inline-flex items-center gap-1.5 bg-amber-50 text-amber-700 border border-amber-100 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-amber-100 transition-colors">
-                  <AlertTriangle className="h-3 w-3" />
-                  {notifications!.pendingComplaints} Pending Complaint{notifications!.pendingComplaints > 1 ? "s" : ""}
-                </span>
+            {notifications && notifications.unreadNotices > 0 && (
+              <Link href="/guest/dashboard/notices" className="block">
+                <div className="flex items-center gap-3 bg-blue-50 border border-blue-100 rounded-xl px-4 py-3 hover:bg-blue-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                    <Bell className="h-4 w-4 text-blue-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-blue-800">Unread Notices</p>
+                    <p className="text-xs text-blue-600 truncate">{notifications.unreadNotices} new notice{notifications.unreadNotices > 1 ? "s" : ""}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-blue-400 shrink-0" />
+                </div>
               </Link>
             )}
-            {notifications!.pendingElectricity > 0 && (
-              <Link href="/guest/dashboard/electricity">
-                <span className="inline-flex items-center gap-1.5 bg-purple-50 text-purple-700 border border-purple-100 px-3 py-1.5 rounded-full text-xs font-semibold hover:bg-purple-100 transition-colors">
-                  <Bolt className="h-3 w-3" />
-                  {notifications!.pendingElectricity} Pending Bill{notifications!.pendingElectricity > 1 ? "s" : ""}
-                </span>
+            {notifications && notifications.pendingComplaints > 0 && (
+              <Link href="/guest/dashboard/complaints" className="block">
+                <div className="flex items-center gap-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 hover:bg-amber-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-amber-100 flex items-center justify-center shrink-0">
+                    <MessageSquare className="h-4 w-4 text-amber-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-amber-800">Pending Complaints</p>
+                    <p className="text-xs text-amber-600 truncate">{notifications.pendingComplaints} complaint{notifications.pendingComplaints > 1 ? "s" : ""} awaiting resolution</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-amber-400 shrink-0" />
+                </div>
+              </Link>
+            )}
+            {notifications && notifications.pendingElectricity > 0 && (
+              <Link href="/guest/dashboard/electricity" className="block">
+                <div className="flex items-center gap-3 bg-purple-50 border border-purple-100 rounded-xl px-4 py-3 hover:bg-purple-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-purple-100 flex items-center justify-center shrink-0">
+                    <Bolt className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-purple-800">Electricity Bills</p>
+                    <p className="text-xs text-purple-600 truncate">{notifications.pendingElectricity} pending bill{notifications.pendingElectricity > 1 ? "s" : ""}</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-purple-400 shrink-0" />
+                </div>
+              </Link>
+            )}
+            {transfer && (
+              <Link href="/guest/dashboard/bed-transfer" className="block">
+                <div className="flex items-center gap-3 bg-sky-50 border border-sky-100 rounded-xl px-4 py-3 hover:bg-sky-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-sky-100 flex items-center justify-center shrink-0">
+                    <ArrowRightLeft className="h-4 w-4 text-sky-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-sky-800">Bed Transfer</p>
+                    <p className="text-xs text-sky-600 truncate">
+                      Status: {transfer.status === "requested" ? "Awaiting Approval" : transfer.status}
+                      {transfer.newBed?.room?.name ? ` · ${transfer.newBed.room.name}` : ""}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-sky-400 shrink-0" />
+                </div>
+              </Link>
+            )}
+            {leaving && (
+              <Link href="/guest/dashboard/leaving" className="block">
+                <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 hover:bg-rose-100 transition-colors">
+                  <div className="h-9 w-9 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                    <LogOut className="h-4 w-4 text-rose-600" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-rose-800">Leaving Notice</p>
+                    <p className="text-xs text-rose-600 truncate">
+                      {leaving.status === "submitted" ? "Submitted — Awaiting Approval" : leaving.status}
+                      {leaving.lastDate ? ` · Last date: ${formatDate(leaving.lastDate)}` : ""}
+                    </p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-rose-400 shrink-0" />
+                </div>
               </Link>
             )}
           </div>

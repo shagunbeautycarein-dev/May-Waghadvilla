@@ -3,6 +3,7 @@ export const siteConfig = {
   tagline: "Premium PG in Ambawadi Ahmedabad for Students & Working Professionals",
   description: "Fully furnished AC rooms with WiFi, homely meals, and 24/7 security. Located near Ambawadi Circle, Vijay Cross Road, and Ellisbridge.",
   url: process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+  ogImage: "https://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg", // Replace with real Cloudinary URL
   contact: {
     phone: "+91-98765-43210",
     email: "info@Waghadvilla.com",

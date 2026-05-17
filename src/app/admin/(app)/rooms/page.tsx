@@ -290,7 +290,7 @@ function ImageUploadField() {
             images={images}
             onChange={handleCloudinaryUpload}
             maxFiles={10}
-            folder="wahad-villa/rooms"
+            folder="waghad-villa/rooms"
             hidePreview
           />
 

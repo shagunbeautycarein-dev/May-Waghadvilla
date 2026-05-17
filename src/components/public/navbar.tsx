@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu, Phone, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -38,11 +39,14 @@ export function Navbar({ logoUrl }: { logoUrl?: string }) {
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
             {logoUrl ? (
-              <img
-                src={logoUrl}
-                alt="The Waghad Villa"
-                className="h-10 w-auto object-contain group-hover:scale-110 transition-transform"
-              />
+              <div className="relative h-10 w-32">
+                <Image
+                  fill
+                  src={logoUrl}
+                  alt="The Waghad Villa"
+                  className="object-contain group-hover:scale-110 transition-transform"
+                />
+              </div>
             ) : (
               <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
                 <Sparkles className="w-6 h-6" />

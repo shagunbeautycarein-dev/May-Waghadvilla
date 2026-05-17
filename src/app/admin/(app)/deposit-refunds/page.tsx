@@ -159,7 +159,7 @@ export default function DepositRefundsPage() {
                 images={proofImage ? [proofImage] : []}
                 onChange={(urls) => setProofImage(urls[0] || "")}
                 maxFiles={1}
-                folder="wahad-villa/refunds"
+                folder="waghad-villa/refunds"
               />
             </div>
             <div className="sm:col-span-2 space-y-2">

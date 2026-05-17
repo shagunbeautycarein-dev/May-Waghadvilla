@@ -172,7 +172,7 @@ export function Step8Payment({ data, guest, onNext, onBack }: Props) {
           images={formData.proofUrl ? [formData.proofUrl] : []}
           onChange={(urls) => setFormData((prev) => ({ ...prev, proofUrl: urls[0] || "" }))}
           maxFiles={1}
-          folder="wahad-villa/payments"
+          folder="waghad-villa/payments"
         />
       </div>
 

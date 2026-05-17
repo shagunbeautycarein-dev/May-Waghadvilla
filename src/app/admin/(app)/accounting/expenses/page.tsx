@@ -327,7 +327,7 @@ export default function ExpensesPage() {
                 images={billImage ? [billImage] : []}
                 onChange={(urls) => setBillImage(urls[0] || "")}
                 maxFiles={1}
-                folder="wahad-villa/expenses"
+                folder="waghad-villa/expenses"
               />
             </div>
             <div className="sm:col-span-2 space-y-2">

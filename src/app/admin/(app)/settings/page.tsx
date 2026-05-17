@@ -566,8 +566,8 @@ export default function AdminSettingsPage() {
                         if (!cloudName) throw new Error("Cloudinary not configured");
                         const formData = new FormData();
                         formData.append("file", file);
-                        formData.append("upload_preset", "wahad_villa_unsigned");
-                        formData.append("folder", "wahad-villa/payment");
+                        formData.append("upload_preset", "waghad_villa_unsigned");
+                        formData.append("folder", "waghad-villa/payment");
                         const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/auto/upload`, {
                           method: "POST",
                           body: formData,

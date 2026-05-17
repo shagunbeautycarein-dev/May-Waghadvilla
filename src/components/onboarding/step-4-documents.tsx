@@ -79,7 +79,7 @@ export function Step4Documents({ data, onNext, onBack }: Props) {
               images={value ? [value] : []}
               onChange={(urls) => setFormData((prev) => ({ ...prev, [doc.key]: urls[0] || "" }))}
               maxFiles={1}
-              folder={`wahad-villa/documents/${doc.key}`}
+              folder={`waghad-villa/documents/${doc.key}`}
             />
           </div>
         );

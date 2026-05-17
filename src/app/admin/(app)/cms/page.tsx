@@ -30,7 +30,7 @@ const TABS = [
 ];
 
 const CLOUDINARY_CLOUD_NAME = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
-const UPLOAD_PRESET = "wahad_villa_unsigned";
+const UPLOAD_PRESET = "waghad_villa_unsigned";
 
 async function uploadToCloudinary(file: File, folder: string): Promise<string> {
   if (!CLOUDINARY_CLOUD_NAME) {
@@ -246,7 +246,7 @@ export default function CMSPage() {
   const handleSingleUpload = async (keyName: string, file: File) => {
     setUploadingKey(keyName);
     try {
-      const url = await uploadToCloudinary(file, "wahad-villa/cms");
+      const url = await uploadToCloudinary(file, "waghad-villa/cms");
       updateSetting(keyName, url);
       toast.success(`${keyName.replace("cms_", "")} uploaded successfully`);
     } catch (e: any) {
@@ -269,7 +269,7 @@ export default function CMSPage() {
 
     try {
       for (const file of toUpload) {
-        const url = await uploadToCloudinary(file, "wahad-villa/cms");
+        const url = await uploadToCloudinary(file, "waghad-villa/cms");
         urls.push(url);
       }
       if (urls.length > 0) {
@@ -443,7 +443,7 @@ export default function CMSPage() {
           <div className="space-y-5 max-w-lg">
             <Field label="Phone" value={settings.cms_contact_phone || ""} placeholder="+91 98765 43210" onChange={(v) => updateSetting("cms_contact_phone", v)} />
             <Field label="WhatsApp" value={settings.cms_contact_whatsapp || ""} placeholder="+91 98765 43210" onChange={(v) => updateSetting("cms_contact_whatsapp", v)} />
-            <Field label="Email" value={settings.cms_contact_email || ""} placeholder="info@wahadvilla.com" onChange={(v) => updateSetting("cms_contact_email", v)} />
+            <Field label="Email" value={settings.cms_contact_email || ""} placeholder="info@waghadvilla.com" onChange={(v) => updateSetting("cms_contact_email", v)} />
             <Field label="Address" value={settings.cms_contact_address || ""} type="textarea" placeholder="Full address..." onChange={(v) => updateSetting("cms_contact_address", v)} />
             <Field label="Google Map Embed URL" value={settings.cms_contact_map || ""} placeholder="https://www.google.com/maps/embed..." onChange={(v) => updateSetting("cms_contact_map", v)} />
 

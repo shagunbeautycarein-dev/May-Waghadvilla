@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { cn } from "@/lib/utils";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Image from "next/image";
 
 interface RoomImageGalleryProps {
   images: string[];
@@ -60,10 +61,11 @@ export function RoomImageGallery({ images, roomName }: RoomImageGalleryProps) {
                 key={index}
                 className="relative flex-[0_0_100%] min-w-0 h-full"
               >
-                <img
+                <Image
+                  fill
                   src={img}
                   alt={`${roomName} ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  className="object-cover"
                 />
               </div>
             ))}
@@ -105,10 +107,11 @@ export function RoomImageGallery({ images, roomName }: RoomImageGalleryProps) {
                   : "border-transparent opacity-70 hover:opacity-100 hover:scale-105"
               )}
             >
-              <img
+              <Image
+                fill
                 src={img}
                 alt={`Thumbnail ${index + 1}`}
-                className="w-full h-full object-cover"
+                className="object-cover"
               />
               {/* Optional overlay for unselected state */}
               {selectedIndex !== index && (

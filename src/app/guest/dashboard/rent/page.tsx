@@ -223,7 +223,7 @@ export default function GuestRentPage() {
                 images={uploadData.proofImage ? [uploadData.proofImage] : []}
                 onChange={(urls) => setUploadData((prev) => ({ ...prev, proofImage: urls[0] || "" }))}
                 maxFiles={1}
-                folder="wahad-villa/payments"
+                folder="waghad-villa/payments"
               />
             </div>
 
