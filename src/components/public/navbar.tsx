@@ -16,7 +16,7 @@ const navLinks = [
   { href: "/contact", label: "Contact" },
 ];
 
-export function Navbar() {
+export function Navbar({ logoUrl }: { logoUrl?: string }) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -37,9 +37,17 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
-              <Sparkles className="w-6 h-6" />
-            </div>
+            {logoUrl ? (
+              <img
+                src={logoUrl}
+                alt="The Waghad Villa"
+                className="h-10 w-auto object-contain group-hover:scale-110 transition-transform"
+              />
+            ) : (
+              <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white shadow-lg shadow-emerald-600/20 group-hover:scale-110 transition-transform">
+                <Sparkles className="w-6 h-6" />
+              </div>
+            )}
             <span className="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">
               The Waghad Villa
             </span>
