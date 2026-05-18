@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { safeQuery } from "@/lib/db-safe";
 import { AdminSidebar } from "@/components/admin/admin-sidebar";
 import { AdminHeader } from "@/components/admin/admin-header";
+import { getCmsSettings } from "@/lib/cms";
 export const dynamic = "force-dynamic";
 import { Toaster } from "@/components/ui/sonner";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 export default async function AdminLayout({
   children,
@@ -32,10 +34,14 @@ export default async function AdminLayout({
     redirect("/admin/login");
   }
 
+  const cms = await getCmsSettings();
+  const logoUrl = cms["cms_logo"] || "";
+
   return (
     <>
+      <PwaInstallBanner label="Waghad Villa Admin" />
       <div className="min-h-screen bg-slate-50">
-        <AdminSidebar admin={admin} />
+        <AdminSidebar admin={admin} logoUrl={logoUrl} />
         <div className="md:pl-64 flex flex-col min-h-screen">
           <AdminHeader admin={admin} />
           <main className="flex-1 p-4 md:p-6 pb-20 md:pb-6 overflow-auto min-w-0">{children}</main>

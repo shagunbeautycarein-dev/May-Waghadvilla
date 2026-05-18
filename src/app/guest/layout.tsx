@@ -21,6 +21,7 @@ import {
   Menu,
   ChevronRight,
 } from "lucide-react";
+import { PwaInstallBanner } from "@/components/pwa-install-banner";
 
 const NAV = [
   { href: "/guest/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -114,7 +115,12 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
   };
 
   if (pathname === "/guest/login") {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <PwaInstallBanner label="Waghad Villa" />
+      </>
+    );
   }
 
   if (loading) {
@@ -137,51 +143,9 @@ export default function GuestLayout({ children }: { children: React.ReactNode })
     .slice(0, 2)
     .toUpperCase();
 
-  const [installPrompt, setInstallPrompt] = useState<Event | null>(null);
-  const [showInstallBanner, setShowInstallBanner] = useState(false);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-      setTimeout(() => setShowInstallBanner(true), 3000);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
-
-  const handleInstall = async () => {
-    if (!installPrompt) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (installPrompt as any).prompt();
-    setInstallPrompt(null);
-    setShowInstallBanner(false);
-  };
-
   return (
     <div className="min-h-screen bg-slate-50 flex flex-col md:flex-row">
-      {/* PWA Install Banner */}
-      {showInstallBanner && (
-        <div className="fixed bottom-20 left-4 right-4 z-50 md:left-auto md:right-6 md:bottom-6 md:w-80">
-          <div className="bg-slate-900 text-white rounded-2xl shadow-2xl p-4 flex items-center gap-3">
-            <div className="h-10 w-10 rounded-xl bg-emerald-500 flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold">Install App</p>
-              <p className="text-xs text-slate-400">Add Waghad Villa to your home screen</p>
-            </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <button onClick={handleInstall} className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors">
-                Install
-              </button>
-              <button onClick={() => setShowInstallBanner(false)} className="text-slate-400 hover:text-white p-1">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PwaInstallBanner label="Waghad Villa" />
 
       {/* â”€â”€ Desktop Sidebar â”€â”€ */}
       <aside className="hidden md:flex w-64 bg-white border-r border-slate-100 flex-col shrink-0 sticky top-0 h-screen">

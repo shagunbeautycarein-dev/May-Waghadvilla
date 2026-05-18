@@ -47,8 +47,15 @@ async function uploadToCloudinary(file: File, folder: string): Promise<string> {
   );
 
   if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Upload failed: ${err}`);
+    const errText = await res.text();
+    let message = errText;
+    try {
+      const parsed = JSON.parse(errText);
+      message = parsed.error?.message || parsed.message || errText;
+    } catch {
+      // keep raw text if not valid JSON
+    }
+    throw new Error(message);
   }
 
   const data = await res.json();
@@ -66,6 +73,7 @@ function ImageField({
   label,
   keyName,
   placeholder,
+  hint,
   url,
   isUploading,
   onChange,
@@ -74,6 +82,7 @@ function ImageField({
   label: string;
   keyName: string;
   placeholder?: string;
+  hint?: string;
   url: string;
   isUploading: boolean;
   onChange: (val: string) => void;
@@ -104,6 +113,7 @@ function ImageField({
         </div>
       )}
 
+      {hint && <p className="text-[11px] text-slate-400">{hint}</p>}
       <div className="flex items-center gap-2">
         <Input
           value={url}
@@ -354,6 +364,7 @@ export default function CMSPage() {
               label="Favicon URL"
               keyName="cms_favicon"
               placeholder="https://..."
+              hint="Use PNG, JPG, WebP, or SVG. ICO files are not supported."
               url={settings.cms_favicon || ""}
               isUploading={uploadingKey === "cms_favicon"}
               onChange={(v) => updateSetting("cms_favicon", v)}

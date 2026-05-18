@@ -2,17 +2,25 @@
 
 import { Phone, MessageCircle, X } from "lucide-react";
 import { useState } from "react";
-import { siteConfig } from "@/config/site";
 
-export function ContactFAB() {
+export function ContactFAB({
+  phone,
+  whatsapp,
+}: {
+  phone?: string;
+  whatsapp?: string;
+}) {
   const [open, setOpen] = useState(false);
+
+  const cleanPhone = phone?.replace(/\D/g, "") || "";
+  const cleanWhatsapp = whatsapp?.replace(/\D/g, "") || cleanPhone;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
       {open && (
         <>
           <a
-            href={`https://wa.me/${siteConfig.contact.phone.replace(/\D/g, "")}`}
+            href={`https://wa.me/${cleanWhatsapp}`}
             target="_blank"
             rel="noopener noreferrer"
             className="w-12 h-12 bg-green-500 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform"
@@ -21,7 +29,7 @@ export function ContactFAB() {
             <MessageCircle className="w-5 h-5" />
           </a>
           <a
-            href={`tel:${siteConfig.contact.phone}`}
+            href={`tel:${phone || ""}`}
             className="w-12 h-12 bg-blue-500 rounded-full shadow-lg flex items-center justify-center text-white hover:scale-110 transition-transform"
             title="Call"
           >

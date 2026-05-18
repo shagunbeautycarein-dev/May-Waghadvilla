@@ -2,11 +2,10 @@
 
 import { useState, useEffect } from "react";
 import { X, Phone, Calendar, Sparkles, MapPin } from "lucide-react";
-import { siteConfig } from "@/config/site";
 
 const STORAGE_KEY = "waghad_popup_dismissed";
 
-export function CTAPopup() {
+export function CTAPopup({ phone }: { phone?: string }) {
   const [show, setShow] = useState(false);
 
   useEffect(() => {
@@ -53,7 +52,7 @@ export function CTAPopup() {
 
           <div className="space-y-3">
             <a
-              href={`tel:${siteConfig.contact.phone}`}
+              href={`tel:${phone || ""}`}
               className="flex items-center justify-center gap-2 w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-2xl transition-colors text-sm"
             >
               <Phone className="w-4 h-4" /> Call Now — Free Visit

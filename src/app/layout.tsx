@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { siteConfig } from "@/config/site";
-import { getCmsSettings } from "@/lib/cms";
 import Script from "next/script";
 import { Viewport } from "next";
 import "./globals.css";
@@ -18,15 +17,9 @@ const geistMono = Geist_Mono({
 });
 
 export async function generateMetadata(): Promise<Metadata> {
-  const cms = await getCmsSettings();
-  const favicon = cms["cms_favicon"] || "/favicon.ico";
   return {
     title: siteConfig.name,
     description: siteConfig.description,
-    icons: {
-      icon: favicon,
-      shortcut: favicon,
-    },
   };
 }
 

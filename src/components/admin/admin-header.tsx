@@ -39,6 +39,7 @@ const allNavItems = [
   { href: "/admin/complaints", label: "Complaints", icon: MessageSquare },
   { href: "/admin/notices", label: "Notices", icon: Bell },
   { href: "/admin/accounting", label: "P&L Overview", icon: BarChart3 },
+  { href: "/admin/accounting/statement", label: "Statement", icon: FileText },
   { href: "/admin/accounting/expenses", label: "Expenses", icon: FileText },
   { href: "/admin/accounting/daily-entry", label: "Daily Entry", icon: ListPlus },
   { href: "/admin/accounting/categories", label: "Categories", icon: Tag },

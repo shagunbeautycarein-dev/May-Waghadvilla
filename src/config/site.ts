@@ -18,7 +18,6 @@ export const siteConfig = {
     "PG in Ambawadi Ahmedabad",
     "paying guest Ambawadi",
     "boys PG Ambawadi",
-    "girls PG Ambawadi",
     "hostel Ambawadi",
     "PG near Vijay Cross Road",
     "furnished PG Ahmedabad",

@@ -2,7 +2,7 @@
   "name": "The Waghad Villa",
   "short_name": "Waghad Villa",
   "description": "Premium PG Accommodation in Ambawadi, Ahmedabad",
-  "start_url": "/guest/dashboard",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#059669",

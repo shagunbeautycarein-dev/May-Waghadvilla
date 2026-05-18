@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 
 const testimonials = [
   { name: "Rahul S.", role: "Software Developer", text: "Best PG in Ambawadi for working professionals. Clean rooms, amazing food, unbeatable location near Vijay Cross Road.", rating: 5 },
-  { name: "Priya M.", role: "CA Student", text: "I searched many girls PGs in Ahmedabad before finding Waghad Villa. Safety, cleanliness, friendly management — highly recommended!", rating: 5 },
+  { name: "Karan J.", role: "CA Student", text: "I searched many boys PGs in Ahmedabad before finding Waghad Villa. Safety, cleanliness, friendly management — highly recommended!", rating: 5 },
   { name: "Amit K.", role: "MBA Student", text: "Affordable PG with AC and WiFi near Law Garden. Fair rent calculation, great value for money.", rating: 4 },
 ];
 

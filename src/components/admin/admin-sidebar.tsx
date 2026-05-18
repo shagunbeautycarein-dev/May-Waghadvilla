@@ -47,6 +47,7 @@ const navItems = [
     icon: BarChart3,
     children: [
       { href: "/admin/accounting", label: "P&L Overview", icon: BarChart3 },
+      { href: "/admin/accounting/statement", label: "Statement", icon: FileText },
       { href: "/admin/accounting/expenses", label: "Expenses", icon: FileText },
       { href: "/admin/accounting/daily-entry", label: "Daily Entry", icon: ListPlus },
       { href: "/admin/accounting/categories", label: "Categories", icon: Tag },
@@ -75,7 +76,7 @@ function isActiveOrChild(pathname: string, href: string, children?: Array<{ href
   return false;
 }
 
-export function AdminSidebar({ admin }: { admin: { name: string; role: string } }) {
+export function AdminSidebar({ admin, logoUrl }: { admin: { name: string; role: string }; logoUrl?: string }) {
   const pathname = usePathname();
   const accountingActive = isActiveOrChild(
     pathname,
@@ -136,13 +137,21 @@ export function AdminSidebar({ admin }: { admin: { name: string; role: string } 
       {/* Brand */}
       <div className="h-16 flex items-center justify-between px-5 border-b border-white/10 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-900/30">
-            <Sparkles className="w-4 h-4 text-white" />
-          </div>
-          <div>
-            <p className="text-sm font-bold text-white leading-none">The Waghad Villa</p>
-            <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Admin Panel</p>
-          </div>
+          {logoUrl ? (
+            <div className="relative h-8 w-28">
+              <img src={logoUrl} alt="The Waghad Villa" className="object-contain w-full h-full" />
+            </div>
+          ) : (
+            <>
+              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-emerald-400 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-900/30">
+                <Sparkles className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white leading-none">The Waghad Villa</p>
+                <p className="text-[10px] text-slate-400 mt-0.5 uppercase tracking-wider">Admin Panel</p>
+              </div>
+            </>
+          )}
         </div>
         <button
           onClick={() => setMobileOpen(false)}
