@@ -93,6 +93,27 @@ export function AdminSidebar({ admin, logoUrl }: { admin: { name: string; role: 
     "/admin/reports": reportsActive,
   });
 
+  const [notifications, setNotifications] = useState<Record<string, number>>({});
+
+  useEffect(() => {
+    const fetchNotifs = async () => {
+      try {
+        const res = await fetch("/api/admin/notifications");
+        if (res.ok) {
+          const data = await res.json();
+          const counts: Record<string, number> = {};
+          data.items.forEach((item: any) => {
+            counts[item.href] = item.count;
+          });
+          setNotifications(counts);
+        }
+      } catch { }
+    };
+    fetchNotifs();
+    const interval = setInterval(fetchNotifs, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
   const toggleSection = (href: string) => {
     setOpenSections((prev) => ({ ...prev, [href]: !prev[href] }));
   };
@@ -184,7 +205,14 @@ export function AdminSidebar({ admin, logoUrl }: { admin: { name: string; role: 
                     <div className="w-0.5 h-5 bg-emerald-400 rounded-full -ml-0.5 absolute left-3" />
                   ) : null}
                   <Icon className="w-4.5 h-4.5 shrink-0" />
-                  <span className="flex-1 text-left">{item.label}</span>
+                  <span className="flex-1 text-left flex items-center justify-between">
+                    {item.label}
+                    {notifications[item.href] > 0 && (
+                      <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full ml-2">
+                        {notifications[item.href]}
+                      </span>
+                    )}
+                  </span>
                   <ChevronDown
                     className={cn(
                       "w-3.5 h-3.5 transition-transform text-slate-500",
@@ -209,7 +237,12 @@ export function AdminSidebar({ admin, logoUrl }: { admin: { name: string; role: 
                           )}
                         >
                           <ChildIcon className="w-3.5 h-3.5" />
-                          {child.label}
+                          <span className="flex-1">{child.label}</span>
+                          {notifications[child.href] > 0 && (
+                            <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                              {notifications[child.href]}
+                            </span>
+                          )}
                         </Link>
                       );
                     })}
@@ -234,7 +267,12 @@ export function AdminSidebar({ admin, logoUrl }: { admin: { name: string; role: 
                 <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-emerald-400 rounded-r-full" />
               )}
               <Icon className="w-4.5 h-4.5 shrink-0" />
-              {item.label}
+              <span className="flex-1">{item.label}</span>
+              {notifications[item.href] > 0 && (
+                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shrink-0">
+                  {notifications[item.href]}
+                </span>
+              )}
             </Link>
           );
         })}

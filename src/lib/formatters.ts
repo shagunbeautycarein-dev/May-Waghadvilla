@@ -34,7 +34,7 @@ export function formatDateTime(
 
 /**
  * Format a number as Indian Rupees currency.
- * @example formatCurrency(12500) → "₹12,500"
+ * @example formatCurrency(12500) → "Rs. 12,500"
  */
 export function formatCurrency(
   value: number | string | null | undefined
@@ -42,12 +42,12 @@ export function formatCurrency(
   if (value === null || value === undefined || value === "") return "—";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "—";
-  return `₹${num.toLocaleString("en-IN")}`;
+  return `Rs. ${num.toLocaleString("en-IN")}`;
 }
 
 /**
  * Format a number as Indian Rupees with decimal places.
- * @example formatCurrencyPrecise(12500.5) → "₹12,500.50"
+ * @example formatCurrencyPrecise(12500.5) → "Rs. 12,500.50"
  */
 export function formatCurrencyPrecise(
   value: number | string | null | undefined
@@ -55,7 +55,7 @@ export function formatCurrencyPrecise(
   if (value === null || value === undefined || value === "") return "—";
   const num = typeof value === "string" ? parseFloat(value) : value;
   if (isNaN(num)) return "—";
-  return `₹${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `Rs. ${num.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 /**

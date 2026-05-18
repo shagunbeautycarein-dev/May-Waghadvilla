@@ -20,6 +20,8 @@ interface Guest {
   room?: { name: string };
   bed?: { name: string };
   onboardingData?: { status: string };
+  joiningDate?: string;
+  rentCycleDate?: number;
 }
 
 interface LedgerEntry {
@@ -282,6 +284,18 @@ export default function GuestDashboardPage() {
     return { ...row, balance: runningBalance };
   });
 
+  const getOrdinalNum = (n: number) => n + (n > 0 ? ['th', 'st', 'nd', 'rd'][(n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10] : '');
+
+  let nextRentDateStr = "Not Set";
+  if (guest.rentCycleDate) {
+    const now = new Date();
+    let nextD = new Date(now.getFullYear(), now.getMonth(), guest.rentCycleDate);
+    if (now.getDate() > guest.rentCycleDate) {
+      nextD = new Date(now.getFullYear(), now.getMonth() + 1, guest.rentCycleDate);
+    }
+    nextRentDateStr = formatDate(nextD.toISOString());
+  }
+
   const cards = [
     {
       label: "Room & Bed",
@@ -291,12 +305,27 @@ export default function GuestDashboardPage() {
       iconColor: "text-teal-600",
     },
     {
-      label: "Next Rent Due",
-      value: nextDue ? formatCurrency(nextDue.due) : formatCurrency(0),
+      label: "Date of Joining",
+      value: guest.joiningDate ? formatDate(guest.joiningDate) : "-",
       icon: Calendar,
-      iconBg: "bg-blue-50",
-      iconColor: "text-blue-600",
-      subtext: nextDue ? `Due: ${formatDate(nextDue.createdAt)}` : undefined,
+      iconBg: "bg-indigo-50",
+      iconColor: "text-indigo-600",
+    },
+    {
+      label: "Next Rent Date",
+      value: nextRentDateStr,
+      icon: Clock,
+      iconBg: "bg-purple-50",
+      iconColor: "text-purple-600",
+      subtext: guest.rentCycleDate ? `Cycle: ${getOrdinalNum(guest.rentCycleDate)} of month` : undefined,
+    },
+    {
+      label: "Outstanding Due",
+      value: nextDue ? formatCurrency(nextDue.due) : formatCurrency(0),
+      icon: Receipt,
+      iconBg: "bg-rose-50",
+      iconColor: "text-rose-600",
+      subtext: nextDue ? `Since: ${formatDate(nextDue.createdAt)}` : undefined,
     },
     {
       label: "Security Deposit",
@@ -457,7 +486,7 @@ export default function GuestDashboardPage() {
         )}
 
         {/* —— Stat Cards Grid —— */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {cards.map((card) => (
             <div
               key={card.label}

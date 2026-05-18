@@ -502,7 +502,7 @@ export function ApprovalCard({ data, type, onAction }: ApprovalCardProps) {
                   )}
                   {s4.pan && (
                     <div>
-                      <p className="text-xs text-slate-500 mb-1.5">PAN Card</p>
+                      <p className="text-xs text-slate-500 mb-1.5">Aadhaar Card</p>
                       <div className="rounded-lg border border-slate-100 bg-white overflow-hidden">
                         <img
                           src={s4.pan}

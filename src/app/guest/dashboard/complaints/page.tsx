@@ -82,8 +82,8 @@ export default function GuestComplaintsPage() {
   }, [fetchData]);
 
   const handleSubmit = async () => {
-    if (!category || !description || description.length < 20) {
-      toast.error("Please select a category and enter a description (min 20 chars)");
+    if (!category || !description) {
+      toast.error("Please select a category and enter a description");
       return;
     }
     setSaving(true);
@@ -210,7 +210,7 @@ export default function GuestComplaintsPage() {
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe your issue in detail (min 20 characters)..."
+                  placeholder="Describe your issue in detail..."
                   rows={4}
                   className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500 resize-none min-h-[44px]"
                 />

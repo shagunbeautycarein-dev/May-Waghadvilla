@@ -211,7 +211,7 @@ export default async function HomePage() {
                 name: "Do you offer single room or only room sharing?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "We offer both options. You can choose a private single room for complete privacy, or opt for 2-sharing or 3-sharing rooms with professionally matched flatmates. All rooms are fully furnished and air-conditioned.",
+                  text: "We offer both options. You can choose a private single room for complete privacy, or opt for 2-sharing to 10-sharing rooms with professionally matched flatmates. All rooms are fully furnished and air-conditioned.",
                 },
               },
               {
@@ -219,7 +219,7 @@ export default async function HomePage() {
                 name: "What is the rent for room sharing in Ambawadi?",
                 acceptedAnswer: {
                   "@type": "Answer",
-                  text: "Room sharing at The Waghad Villa starts from ₹6,500 per month for triple sharing, ₹9,000 for double sharing, and ₹12,000 for single occupancy. All prices are inclusive of electricity, water, WiFi, and maintenance.",
+                  text: "Room sharing at The Waghad Villa starts from ₹6,500 per month depending on sharing type (1-sharing to 10-sharing). All prices are inclusive of electricity, water, WiFi, and maintenance.",
                 },
               },
               {
@@ -405,7 +405,7 @@ export default async function HomePage() {
               <div className="bg-white rounded-xl p-6 shadow-sm">
                 <h3 className="font-semibold text-lg mb-3 text-emerald-700">Private & Shared Options</h3>
                 <p className="text-sm text-gray-600">
-                  Choose from single occupancy for complete privacy or 2-sharing / 3-sharing rooms with matched flatmates. All rooms are fully furnished and air-conditioned.
+                  Choose from single occupancy for complete privacy or 2-sharing to 10-sharing rooms with matched flatmates. All rooms are fully furnished and air-conditioned.
                 </p>
               </div>
               <div className="bg-white rounded-xl p-6 shadow-sm">
@@ -643,11 +643,11 @@ export default async function HomePage() {
                 },
                 {
                   q: "Do you offer single room or only room sharing?",
-                  a: "We offer both options. You can choose a private single room for complete privacy, or opt for 2-sharing or 3-sharing rooms with professionally matched flatmates. All rooms are fully furnished and air-conditioned."
+                  a: "We offer both options. You can choose a private single room for complete privacy, or opt for 2-sharing to 10-sharing rooms with professionally matched flatmates. All rooms are fully furnished and air-conditioned."
                 },
                 {
                   q: "What is the rent for room sharing in Ambawadi?",
-                  a: "Room sharing at The Waghad Villa starts from ₹6,500 per month for triple sharing, ₹9,000 for double sharing, and ₹12,000 for single occupancy. All prices are inclusive of electricity, water, WiFi, and maintenance."
+                  a: "Room sharing at The Waghad Villa starts from ₹6,500 per month depending on sharing type (1-sharing to 10-sharing). All prices are inclusive of electricity, water, WiFi, and maintenance."
                 },
                 {
                   q: "Is the PG near Parimal Garden and CG Road?",

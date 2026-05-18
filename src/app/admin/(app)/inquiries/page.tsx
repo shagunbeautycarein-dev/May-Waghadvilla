@@ -1274,7 +1274,7 @@ export default function InquiriesPage() {
                 <SelectContent>
                   {beds.map((bed) => (
                     <SelectItem key={bed.id} value={bed.id}>
-                      Bed {bed.name} (â‚¹{bed.rent.toLocaleString()})
+                      Bed {bed.name} (Rs. {bed.rent.toLocaleString()})
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -1293,7 +1293,7 @@ export default function InquiriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="monthlyRent" className="text-slate-700">Monthly Rent (â‚¹)</Label>
+              <Label htmlFor="monthlyRent" className="text-slate-700">Monthly Rent (Rs.)</Label>
               <Input
                 id="monthlyRent"
                 type="number"
@@ -1305,7 +1305,7 @@ export default function InquiriesPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="deposit" className="text-slate-700">Deposit (â‚¹)</Label>
+              <Label htmlFor="deposit" className="text-slate-700">Deposit (Rs.)</Label>
               <Input
                 id="deposit"
                 type="number"
@@ -1357,7 +1357,7 @@ export default function InquiriesPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Per Day Rent</span>
-                    <span className="text-slate-900">â‚¹{rentCalculation.perDayRent.toLocaleString()}</span>
+                    <span className="text-slate-900">Rs. {rentCalculation.perDayRent.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Difference Days</span>
@@ -1366,21 +1366,21 @@ export default function InquiriesPage() {
                   <div className="flex justify-between">
                     <span className="text-slate-500">Rent Difference</span>
                     <span className="font-medium text-amber-600">
-                      â‚¹{rentCalculation.differenceAmount.toLocaleString()}
+                      Rs. {rentCalculation.differenceAmount.toLocaleString()}
                     </span>
                   </div>
                   <div className="border-t border-slate-200 my-2 pt-2 space-y-2">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Advance Rent</span>
-                      <span className="text-slate-900">â‚¹{Number(monthlyRent).toLocaleString()}</span>
+                      <span className="text-slate-900">Rs. {Number(monthlyRent).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Security Deposit</span>
-                      <span className="text-slate-900">â‚¹{Number(deposit || 0).toLocaleString()}</span>
+                      <span className="text-slate-900">Rs. {Number(deposit || 0).toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between font-semibold text-slate-900 pt-1">
                       <span>Total Payable</span>
-                      <span>â‚¹{rentCalculation.total.toLocaleString()}</span>
+                      <span>Rs. {rentCalculation.total.toLocaleString()}</span>
                     </div>
                   </div>
                 </div>

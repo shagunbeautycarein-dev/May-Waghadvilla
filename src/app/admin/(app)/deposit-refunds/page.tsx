@@ -28,6 +28,7 @@ export default function DepositRefundsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [guests, setGuests] = useState<{ id: string; name: string; mobile: string; status: string }[]>([]);
 
   const [guestId, setGuestId] = useState("");
   const [amount, setAmount] = useState("");
@@ -47,9 +48,20 @@ export default function DepositRefundsPage() {
     }
   }, []);
 
+  const fetchGuests = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/guests?limit=1000");
+      if (res.ok) {
+        const data = await res.json();
+        setGuests(data.guests || []);
+      }
+    } catch {}
+  }, []);
+
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    fetchGuests();
+  }, [fetchData, fetchGuests]);
 
 
 
@@ -124,16 +136,22 @@ export default function DepositRefundsPage() {
           <h3 className="text-sm font-semibold text-slate-900">New Refund</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-slate-600">Guest ID *</Label>
-              <Input
+              <Label className="text-xs font-medium text-slate-600">Guest *</Label>
+              <select
                 value={guestId}
                 onChange={(e) => setGuestId(e.target.value)}
-                placeholder="Guest UUID"
-                className="rounded-xl border-slate-200"
-              />
+                className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm bg-white"
+              >
+                <option value="">Select a guest...</option>
+                {guests.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name} ({g.mobile}) - {g.status}
+                  </option>
+                ))}
+              </select>
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-slate-600">Refund Amount (â‚¹) *</Label>
+              <Label className="text-xs font-medium text-slate-600">Refund Amount (Rs.) *</Label>
               <Input
                 type="number"
                 value={amount}
@@ -216,7 +234,7 @@ export default function DepositRefundsPage() {
                       {r.guest?.name}
                     </td>
                     <td className="px-4 py-3 text-sm font-semibold text-slate-900">
-                      â‚¹{Number(r.amount).toLocaleString("en-IN")}
+                      Rs. {Number(r.amount).toLocaleString("en-IN")}
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
                       {r.method}

@@ -224,7 +224,7 @@ export function generateGuestPDF(guest: GuestPDFData): jsPDF {
     head: [["Document Type", "Status"]],
     body: [
       ["Aadhaar Card", documents.aadhar ? "Uploaded" : "Not Uploaded"],
-      ["PAN Card", documents.pan ? "Uploaded" : "Not Uploaded"],
+      ["Aadhaar Card", documents.pan ? "Uploaded" : "Not Uploaded"],
       ["Passport Photo", documents.photo ? "Uploaded" : "Not Uploaded"],
     ],
     theme: "grid",

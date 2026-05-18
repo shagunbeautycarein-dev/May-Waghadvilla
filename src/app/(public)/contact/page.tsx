@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { Phone, Mail, MapPin, MessageCircle, Clock } from "lucide-react";
 import { siteConfig } from "@/config/site";
 import { getCmsSettings } from "@/lib/cms";
+import { prisma } from "@/lib/prisma";
 import { generateSEO } from "@/lib/seo";
 import { InquiryForm } from "@/components/public/inquiry-form";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -37,6 +38,16 @@ export default async function ContactPage() {
   const whatsapp = cms["cms_contact_phone"] || siteConfig.contact.whatsapp;
   const mapEmbed = cms["cms_contact_map"] || null;
 
+  // Fetch admin WhatsApp with fallback chain
+  const adminSetting = await prisma.setting.findUnique({
+    where: { key: "admin_whatsapp" },
+    select: { value: true },
+  });
+  const adminWhatsApp =
+    adminSetting?.value ||
+    cms["cms_contact_whatsapp"] ||
+    siteConfig.contact.whatsapp;
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8">
       <div className="mb-12 text-center">
@@ -56,7 +67,7 @@ export default async function ContactPage() {
             Send an Inquiry
           </h2>
           <Suspense fallback={<InquiryFormSkeleton />}>
-            <InquiryForm />
+            <InquiryForm adminWhatsApp={adminWhatsApp} />
           </Suspense>
         </div>
 

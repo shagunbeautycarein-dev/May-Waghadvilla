@@ -27,6 +27,7 @@ import {
   ListPlus,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { NotificationBell } from "./notification-bell";
 
 const allNavItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -96,6 +97,7 @@ export function AdminHeader({ admin }: { admin: { name: string; email: string } 
 
         {/* Right: Actions */}
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <button
             onClick={handleLogout}
             className="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm text-slate-500 hover:text-red-600 hover:bg-red-50 transition-all"

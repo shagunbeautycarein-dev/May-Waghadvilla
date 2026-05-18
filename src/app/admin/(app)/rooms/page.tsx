@@ -129,7 +129,7 @@ const roomFormSchema = z.object({
   floorId: z.string().optional(),
   floorName: z.string().optional(),
   name: z.string().min(1, "Name is required").max(50),
-  sharingType: z.enum(["1-sharing", "2-sharing", "3-sharing", "4-sharing"]),
+  sharingType: z.enum(["1-sharing", "2-sharing", "3-sharing", "4-sharing", "5-sharing", "6-sharing", "7-sharing", "8-sharing", "9-sharing", "10-sharing"]),
   acType: z.enum(["AC", "Non-AC"]),
   mealsIncluded: z.boolean(),
   electricityIncluded: z.boolean(),
@@ -162,9 +162,15 @@ const SHARING_BED_COUNTS: Record<string, number> = {
   "2-sharing": 2,
   "3-sharing": 3,
   "4-sharing": 4,
+  "5-sharing": 5,
+  "6-sharing": 6,
+  "7-sharing": 7,
+  "8-sharing": 8,
+  "9-sharing": 9,
+  "10-sharing": 10,
 };
 
-const BED_NAMES = ["A", "B", "C", "D"];
+const BED_NAMES = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
 
 const STEPS = [
   { id: 1, label: "Room Info", icon: Home },
@@ -470,6 +476,12 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
                     <SelectItem value="2-sharing">2-sharing</SelectItem>
                     <SelectItem value="3-sharing">3-sharing</SelectItem>
                     <SelectItem value="4-sharing">4-sharing</SelectItem>
+                    <SelectItem value="5-sharing">5-sharing</SelectItem>
+                    <SelectItem value="6-sharing">6-sharing</SelectItem>
+                    <SelectItem value="7-sharing">7-sharing</SelectItem>
+                    <SelectItem value="8-sharing">8-sharing</SelectItem>
+                    <SelectItem value="9-sharing">9-sharing</SelectItem>
+                    <SelectItem value="10-sharing">10-sharing</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -601,7 +613,7 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
                     name={`beds.${index}.rent`}
                     render={({ field }) => (
                       <FormItem className="space-y-1">
-                        <FormLabel className="text-xs text-slate-500">Rent (â‚¹)</FormLabel>
+                        <FormLabel className="text-xs text-slate-500">Rent (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -620,7 +632,7 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
                     name={`beds.${index}.deposit`}
                     render={({ field }) => (
                       <FormItem className="space-y-1">
-                        <FormLabel className="text-xs text-slate-500">Deposit (â‚¹)</FormLabel>
+                        <FormLabel className="text-xs text-slate-500">Deposit (Rs.)</FormLabel>
                         <FormControl>
                           <Input
                             type="number"
@@ -922,6 +934,12 @@ function EditRoomForm({ floors }: { floors: Floor[] }) {
                   <SelectItem value="2-sharing">2-sharing</SelectItem>
                   <SelectItem value="3-sharing">3-sharing</SelectItem>
                   <SelectItem value="4-sharing">4-sharing</SelectItem>
+                  <SelectItem value="5-sharing">5-sharing</SelectItem>
+                  <SelectItem value="6-sharing">6-sharing</SelectItem>
+                  <SelectItem value="7-sharing">7-sharing</SelectItem>
+                  <SelectItem value="8-sharing">8-sharing</SelectItem>
+                  <SelectItem value="9-sharing">9-sharing</SelectItem>
+                  <SelectItem value="10-sharing">10-sharing</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -1025,7 +1043,7 @@ function EditRoomForm({ floors }: { floors: Floor[] }) {
                   name={`beds.${index}.rent`}
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs text-slate-500">Rent (â‚¹)</FormLabel>
+                      <FormLabel className="text-xs text-slate-500">Rent (Rs.)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="5000" {...field} onChange={(e) => field.onChange(Number(e.target.value))} className="rounded-xl border-slate-200" />
                       </FormControl>
@@ -1038,7 +1056,7 @@ function EditRoomForm({ floors }: { floors: Floor[] }) {
                   name={`beds.${index}.deposit`}
                   render={({ field }) => (
                     <FormItem className="space-y-1">
-                      <FormLabel className="text-xs text-slate-500">Deposit (â‚¹)</FormLabel>
+                      <FormLabel className="text-xs text-slate-500">Deposit (Rs.)</FormLabel>
                       <FormControl>
                         <Input type="number" placeholder="5000" {...field} onChange={(e) => field.onChange(Number(e.target.value))} className="rounded-xl border-slate-200" />
                       </FormControl>

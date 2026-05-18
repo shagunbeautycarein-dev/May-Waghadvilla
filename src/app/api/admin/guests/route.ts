@@ -28,9 +28,13 @@ export async function GET(request: NextRequest) {
     if (status) {
       where.status = status;
     } else {
-      // By default, hide guests who are approved but haven't moved in yet
-      // They belong in the Approval Center, not the Guest List
-      where.NOT = { status: "Active (Pending Move-In)" };
+      // By default, hide guests who are still in the onboarding phase.
+      // They belong in the Approval Center. "Active (Pending Move-In)" should be visible here.
+      where.NOT = {
+        status: {
+          in: ["Onboarding Started", "Onboarding Submitted", "Draft"],
+        },
+      };
     }
 
     if (roomId) {

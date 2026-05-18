@@ -15,9 +15,27 @@ import {
 } from "@/components/ui/select";
 import { TIME_SLOTS } from "@/lib/constants";
 import { toast } from "sonner";
-import { CheckCircle, CalendarCheck, Clock, MapPin } from "lucide-react";
+import {
+  CheckCircle,
+  CalendarCheck,
+  Clock,
+  MapPin,
+  MessageCircle,
+  ArrowRight,
+} from "lucide-react";
 
-export function InquiryForm() {
+type SubmittedData = {
+  name: string;
+  mobile: string;
+  email: string;
+  visitDate: string;
+  timeSlot: string;
+  notes: string;
+  roomId: string;
+  bedId: string;
+};
+
+export function InquiryForm({ adminWhatsApp }: { adminWhatsApp?: string }) {
   const searchParams = useSearchParams();
   const roomId = searchParams.get("roomId") || "";
   const bedId = searchParams.get("bedId") || "";
@@ -30,7 +48,7 @@ export function InquiryForm() {
   const [notes, setNotes] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [submittedData, setSubmittedData] = useState<{ name: string; visitDate: string; timeSlot: string } | null>(null);
+  const [submittedData, setSubmittedData] = useState<SubmittedData | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,13 +78,57 @@ export function InquiryForm() {
 
       if (!res.ok) throw new Error("Failed to submit inquiry");
 
-      setSubmittedData({ name, visitDate, timeSlot });
+      setSubmittedData({
+        name,
+        mobile,
+        email,
+        visitDate,
+        timeSlot,
+        notes,
+        roomId,
+        bedId,
+      });
       setSubmitted(true);
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const buildWhatsAppLink = (data: SubmittedData) => {
+    if (!adminWhatsApp) return "#";
+    const cleanNumber = adminWhatsApp.replace(/\D/g, "");
+
+    const dateFormatted = new Date(data.visitDate).toLocaleDateString("en-IN", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+
+    const lines = [
+      `🏠 *New Visit Booking — The Waghad Villa*`,
+      "",
+      `👤 *Name:* ${data.name}`,
+      `📱 *Mobile:* ${data.mobile}`,
+      `📧 *Email:* ${data.email}`,
+      `📅 *Visit Date:* ${dateFormatted}`,
+      `⏰ *Time Slot:* ${data.timeSlot}`,
+    ];
+
+    if (data.roomId) {
+      lines.push(`🛏️ *Interested Room:* Yes${data.bedId ? " (specific bed)" : ""}`);
+    }
+
+    if (data.notes?.trim()) {
+      lines.push(`📝 *Notes:* ${data.notes.trim()}`);
+    }
+
+    lines.push("", `📍 *Location:* The Waghad Villa, Ambawadi, Ahmedabad`);
+
+    const text = lines.join("\n");
+    return `https://wa.me/${cleanNumber}?text=${encodeURIComponent(text)}`;
   };
 
   // Thank You Screen
@@ -110,6 +172,25 @@ export function InquiryForm() {
             <span><strong>Location:</strong> The Waghad Villa, Ambawadi, Ahmedabad</span>
           </div>
         </div>
+
+        {/* WhatsApp CTA */}
+        {adminWhatsApp && (
+          <a
+            href={buildWhatsAppLink(submittedData)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block w-full"
+          >
+            <div className="bg-green-600 hover:bg-green-700 text-white rounded-2xl p-4 flex items-center justify-center gap-3 transition-colors cursor-pointer shadow-sm">
+              <MessageCircle className="w-5 h-5" />
+              <div className="text-left">
+                <p className="text-sm font-semibold">Send Details on WhatsApp</p>
+                <p className="text-xs text-green-100">One tap to share your booking with our team</p>
+              </div>
+              <ArrowRight className="w-4 h-4 ml-auto shrink-0" />
+            </div>
+          </a>
+        )}
 
         <div className="bg-slate-50 rounded-2xl p-4 text-sm text-slate-600 leading-relaxed">
           ✅ <strong>We assure you — your visit is confirmed.</strong> Our team will contact you before your scheduled time to confirm directions and any requirements. We look forward to welcoming you!

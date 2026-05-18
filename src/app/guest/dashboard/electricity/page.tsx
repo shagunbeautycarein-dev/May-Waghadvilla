@@ -230,7 +230,7 @@ export default function GuestElectricityPage() {
               </div>
 
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Amount (â‚¹) *</Label>
+                <Label className="text-xs font-medium text-slate-600">Amount (Rs.) *</Label>
                 <Input
                   type="number"
                   value={amountPaid}

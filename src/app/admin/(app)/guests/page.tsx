@@ -268,7 +268,7 @@ export default function GuestsPage() {
 
   // Edit drawer
   const [editGuest, setEditGuest] = useState<GuestSummary | null>(null);
-  const [editForm, setEditForm] = useState({ name: "", mobile: "", email: "", monthlyRent: "" });
+  const [editForm, setEditForm] = useState({ name: "", mobile: "", email: "", monthlyRent: "", status: "" });
   const [saving, setSaving] = useState(false);
 
   // Deactivate
@@ -346,6 +346,7 @@ export default function GuestsPage() {
       mobile: guest.mobile,
       email: guest.email,
       monthlyRent: guest.monthlyRent ? String(guest.monthlyRent) : "",
+      status: guest.status,
     });
   };
 
@@ -361,6 +362,7 @@ export default function GuestsPage() {
           mobile: editForm.mobile,
           email: editForm.email,
           monthlyRent: editForm.monthlyRent ? Number(editForm.monthlyRent) : null,
+          status: editForm.status,
         }),
       });
       if (!res.ok) {
@@ -1013,6 +1015,20 @@ export default function GuestsPage() {
             <div className="space-y-2">
               <Label className="text-xs font-medium text-slate-600">Monthly Rent (₹)</Label>
               <Input type="number" value={editForm.monthlyRent} onChange={(e) => setEditForm((f) => ({ ...f, monthlyRent: e.target.value }))} className="rounded-xl border-slate-200" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-xs font-medium text-slate-600">Status</Label>
+              <Select value={editForm.status} onValueChange={(v) => setEditForm((f) => ({ ...f, status: v }))}>
+                <SelectTrigger className="h-10 rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Active">Active</SelectItem>
+                  <SelectItem value="Active (Pending Move-In)">Move-In Scheduled</SelectItem>
+                  <SelectItem value="Notice Period">Notice Period</SelectItem>
+                  <SelectItem value="Inactive">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex gap-3 pt-4">
               <Button onClick={handleSaveEdit} disabled={saving} className="rounded-full bg-teal-600 hover:bg-teal-700 text-white">

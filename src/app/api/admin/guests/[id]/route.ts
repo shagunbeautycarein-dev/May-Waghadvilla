@@ -117,14 +117,20 @@ export async function PATCH(request: Request, { params }: RouteParams) {
       }
     }
 
+    const dataToUpdate: any = {
+      name: body.name,
+      mobile: body.mobile,
+      email: body.email,
+      monthlyRent: body.monthlyRent,
+    };
+
+    if (body.status) {
+      dataToUpdate.status = body.status;
+    }
+
     const updated = await prisma.guest.update({
       where: { id },
-      data: {
-        name: body.name,
-        mobile: body.mobile,
-        email: body.email,
-        monthlyRent: body.monthlyRent,
-      },
+      data: dataToUpdate,
     });
 
     return NextResponse.json({

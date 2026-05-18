@@ -17,7 +17,7 @@ export const INQUIRY_STATUSES = [
 
 export const TIME_SLOTS = ["Morning", "Afternoon", "Evening"] as const;
 
-export const SHARING_TYPES = ["1-sharing", "2-sharing", "3-sharing", "4-sharing"] as const;
+export const SHARING_TYPES = ["1-sharing", "2-sharing", "3-sharing", "4-sharing", "5-sharing", "6-sharing", "7-sharing", "8-sharing", "9-sharing", "10-sharing"] as const;
 export const AC_TYPES = ["AC", "Non-AC"] as const;
 export const ROOM_STATUSES = ["Active", "Inactive", "Maintenance"] as const;
 

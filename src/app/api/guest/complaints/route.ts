@@ -38,9 +38,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { category, priority, description, images } = body;
 
-    if (!category || !description || description.length < 20) {
+    if (!category || !description) {
       return NextResponse.json(
-        { error: "Category and description (min 20 chars) are required" },
+        { error: "Category and description are required" },
         { status: 400 }
       );
     }

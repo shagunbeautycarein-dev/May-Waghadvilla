@@ -69,16 +69,14 @@ export default function PaymentsPage() {
     // Fetch payment settings for reference
     async function loadSettings() {
       try {
-        const [upiRes, qrRes] = await Promise.all([
-          fetch("/api/settings/payment_upi_id").catch(() => null),
-          fetch("/api/settings/payment_qr_code").catch(() => null),
-        ]);
-        const upiData = upiRes?.ok ? await upiRes.json() : null;
-        const qrData = qrRes?.ok ? await qrRes.json() : null;
-        setPaymentSettings({
-          upiId: upiData?.value || "",
-          qrCode: qrData?.value || "",
-        });
+        const res = await fetch("/api/public/payment-settings");
+        if (res.ok) {
+          const data = await res.json();
+          setPaymentSettings({
+            upiId: data.upiId || "",
+            qrCode: data.qrCode || "",
+          });
+        }
       } catch {
         // ignore
       }
@@ -217,8 +215,13 @@ export default function PaymentsPage() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map((payment) => (
-                <TableRow key={payment.id} className="hover:bg-slate-50/50">
+              {filtered.map((payment) => {
+                const isPending = payment.status === "Uploaded" || payment.status === "Under Review";
+                return (
+                <TableRow 
+                  key={payment.id} 
+                  className={isPending ? "bg-amber-50/50 hover:bg-amber-100/50" : "hover:bg-slate-50/50"}
+                >
                   <TableCell className="text-slate-600">
                     {formatDate(payment.createdAt)}
                   </TableCell>
@@ -313,7 +316,8 @@ export default function PaymentsPage() {
                     </div>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
 

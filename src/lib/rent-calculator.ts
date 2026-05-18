@@ -9,6 +9,7 @@ export function calculateRentDifference(
   rentCycleDate: number // e.g., 5
 ): { perDayRent: number; differenceDays: number; differenceAmount: number } {
   const rent = Number(monthlyRent);
+  const cycleDay = Number(rentCycleDate);
   const joinDate = new Date(joiningDate);
   joinDate.setHours(0, 0, 0, 0);
 
@@ -23,7 +24,7 @@ export function calculateRentDifference(
 
   // If joining date is on or after rent cycle date, no partial rent difference
   // The guest's rent cycle starts from the next full cycle
-  if (joinDate.getDate() >= rentCycleDate) {
+  if (joinDate.getDate() === cycleDay) {
     return {
       perDayRent: Math.round(perDayRent),
       differenceDays: 0,
@@ -41,7 +42,7 @@ export function calculateRentDifference(
     currentDate.setDate(currentDate.getDate() + 1);
 
     // Stop when we reach the cycle date
-    if (currentDate.getDate() === rentCycleDate) {
+    if (currentDate.getDate() === cycleDay) {
       break;
     }
 

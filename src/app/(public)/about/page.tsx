@@ -23,7 +23,7 @@ const reasons = [
   "Daily housekeeping & laundry service",
   "RO drinking water & hot water geyser",
   "Prime location in Ambawadi, Ahmedabad",
-  "Flexible sharing options (1 to 4 sharing)",
+  "Flexible sharing options (1 to 10 sharing)",
 ];
 
 export default async function AboutPage() {

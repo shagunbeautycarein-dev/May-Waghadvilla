@@ -89,23 +89,23 @@ export function Step8Payment({ data, guest, onNext, onBack }: Props) {
 
         <div className="flex justify-between text-sm">
           <span className="text-slate-600">Monthly Rent</span>
-          <span className="font-medium text-slate-900">â‚¹{monthlyRent.toLocaleString()}</span>
+          <span className="font-medium text-slate-900">Rs. {monthlyRent.toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-slate-600">Security Deposit</span>
-          <span className="font-medium text-slate-900">â‚¹{deposit.toLocaleString()}</span>
+          <span className="font-medium text-slate-900">Rs. {deposit.toLocaleString()}</span>
         </div>
         <div className="flex justify-between text-sm">
           <span className="text-slate-600">
             Rent Difference ({rentCalc.differenceDays} days)
           </span>
           <span className="font-medium text-slate-900">
-            â‚¹{rentCalc.differenceAmount.toLocaleString()}
+            Rs. {rentCalc.differenceAmount.toLocaleString()}
           </span>
         </div>
         <div className="border-t border-slate-200 pt-3 flex justify-between text-base font-semibold">
           <span className="text-slate-900">Total Payable</span>
-          <span className="text-teal-700">â‚¹{totalPayable.toLocaleString()}</span>
+          <span className="text-teal-700">Rs. {totalPayable.toLocaleString()}</span>
         </div>
       </div>
 
@@ -141,7 +141,7 @@ export function Step8Payment({ data, guest, onNext, onBack }: Props) {
       </div>
 
       <div className="space-y-2">
-        <Label className="text-xs font-medium text-slate-600">Amount Paid (â‚¹) *</Label>
+        <Label className="text-xs font-medium text-slate-600">Amount Paid (Rs.) *</Label>
         <Input
           type="number"
           min={0}

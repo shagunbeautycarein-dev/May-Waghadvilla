@@ -62,28 +62,59 @@ export default function GuestRentPage() {
     async function load() {
       try {
         const { data: sessionData } = await getGuestSession();
-        const email = sessionData.session?.user?.email;
-        if (!email) return;
+        const user = sessionData.session?.user;
 
-        const guestRes = await fetch(`/api/guest/profile?email=${encodeURIComponent(email)}`);
-        if (!guestRes.ok) return;
-        const guestData: Guest = await guestRes.json();
+        let guestData: Guest | undefined;
+
+        if (user) {
+          const guestRes = await fetch(`/api/guest/profile?guestId=${user.id}`);
+          if (guestRes.ok) {
+            guestData = await guestRes.json();
+          }
+        }
+
+        if (!guestData) {
+          const meRes = await fetch("/api/guest/me");
+          if (meRes.ok) {
+            guestData = await meRes.json();
+          }
+        }
+
+        if (!guestData) {
+          return;
+        }
+
         setGuest(guestData);
 
         const ledgerRes = await fetch(`/api/guest/ledger?guestId=${guestData.id}`);
         if (ledgerRes.ok) setLedger(await ledgerRes.json());
 
-        // Fetch payment settings
-        const [upiRes, qrRes] = await Promise.all([
-          fetch("/api/settings/payment_upi_id").catch(() => null),
-          fetch("/api/settings/payment_qr_code").catch(() => null),
-        ]);
-        const upiData = upiRes?.ok ? await upiRes.json() : null;
-        const qrData = qrRes?.ok ? await qrRes.json() : null;
-        setPaymentSettings({
-          upiId: upiData?.value || "",
-          qrCode: qrData?.value || "",
-        });
+        // Fetch payment settings (use existing endpoints that admin already uses)
+        console.log("[DEBUG] Fetching payment settings...");
+        try {
+          const [upiRes, qrRes] = await Promise.all([
+            fetch("/api/settings/payment_upi_id", { cache: "no-store" }),
+            fetch("/api/settings/payment_qr_code", { cache: "no-store" }),
+          ]);
+          console.log("[DEBUG] UPI response status:", upiRes.status);
+          console.log("[DEBUG] QR response status:", qrRes.status);
+
+          const upiData = upiRes.ok ? await upiRes.json() : null;
+          const qrData = qrRes.ok ? await qrRes.json() : null;
+          console.log("[DEBUG] UPI data:", upiData);
+          console.log("[DEBUG] QR data:", qrData);
+
+          setPaymentSettings({
+            upiId: upiData?.value || "",
+            qrCode: qrData?.value || "",
+          });
+          console.log("[DEBUG] Payment settings set:", {
+            upiId: upiData?.value || "",
+            qrCode: qrData?.value || "",
+          });
+        } catch (settingsErr) {
+          console.error("[DEBUG] Failed to load payment settings:", settingsErr);
+        }
       } catch {
         // silent
       } finally {
@@ -92,6 +123,10 @@ export default function GuestRentPage() {
     }
     load();
   }, []);
+
+  useEffect(() => {
+    console.log("[DEBUG] paymentSettings state changed:", paymentSettings);
+  }, [paymentSettings]);
 
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -166,7 +201,7 @@ export default function GuestRentPage() {
           <form onSubmit={handleUpload} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-xs font-medium text-slate-600">Amount (â‚¹)</Label>
+                <Label className="text-xs font-medium text-slate-600">Amount (Rs.)</Label>
                 <Input
                   type="number"
                   value={uploadData.amount}
