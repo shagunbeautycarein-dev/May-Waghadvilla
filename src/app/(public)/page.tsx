@@ -551,7 +551,7 @@ export default async function HomePage() {
               </div>
             </div>
 
-            <div className="mt-10 rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
+            <div className="mt-10 bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.0!2d72.5714!3d23.0225!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMjPCsDAxJzIxLjAiTiA3MsKwMzQnMTcuMCJF!5e0!3m2!1sen!2sin!4v1"
                 width="100%"
@@ -562,6 +562,21 @@ export default async function HomePage() {
                 referrerPolicy="no-referrer-when-downgrade"
                 title="The Waghad Villa location map"
               />
+              <div className="p-4 sm:p-5 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-100">
+                <div className="text-center sm:text-left">
+                  <h4 className="font-semibold text-slate-900">The Waghad Villa</h4>
+                  <p className="text-sm text-slate-500 mt-0.5">Near Parimal Garden, Ambawadi, Ahmedabad</p>
+                </div>
+                <a 
+                  href="https://share.google/1pDMwRjDcqMAllWwG" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="inline-flex items-center justify-center gap-2 w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-medium transition-colors text-sm shadow-sm"
+                >
+                  <MapPin className="w-4 h-4" />
+                  Get Directions
+                </a>
+              </div>
             </div>
           </div>
         </section>
