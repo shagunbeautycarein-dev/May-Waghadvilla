@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
   }
 
   // Protect guest routes — allow Supabase auth OR custom guest_session cookie
-  if (pathname.startsWith("/guest") && !pathname.startsWith("/guest/login")) {
+  if (pathname.startsWith("/guest") && !pathname.startsWith("/guest/login") && !pathname.startsWith("/guest/onboarding")) {
     const hasSupabaseCookie = request.cookies
       .getAll()
       .some((c) => c.name.startsWith("sb-"));

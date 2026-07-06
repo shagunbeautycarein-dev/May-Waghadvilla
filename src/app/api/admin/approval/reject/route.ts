@@ -17,7 +17,16 @@ export async function POST(request: Request) {
     const onboarding = await prisma.onboardingData.update({
       where: { id: onboardingId },
       data: { status: "Rejected", rejectionReason: reason },
+      include: { guest: { select: { bedId: true } } },
     });
+
+    // Free the bed when onboarding is rejected so it becomes available again
+    if (onboarding.guest?.bedId) {
+      await prisma.bed.update({
+        where: { id: onboarding.guest.bedId },
+        data: { status: "Available", currentGuestId: null },
+      });
+    }
 
     const admin = await getCurrentAdmin();
     await logAudit({

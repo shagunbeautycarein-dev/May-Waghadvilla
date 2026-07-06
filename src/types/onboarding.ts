@@ -30,7 +30,8 @@ export interface Step3Job {
 }
 
 export interface Step4Documents {
-  aadhar?: string;
+  aadhar?: string; // We'll label this as Aadhar Front
+  aadharBack?: string;
   pan?: string;
   photo?: string;
   idType?: string;

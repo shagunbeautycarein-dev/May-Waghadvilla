@@ -130,6 +130,7 @@ export async function POST(request: Request) {
         status: "Inactive",
         leavingDate: new Date(),
         bedId: null,
+        roomId: null,
       },
     });
 

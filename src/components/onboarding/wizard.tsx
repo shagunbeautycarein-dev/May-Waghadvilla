@@ -278,7 +278,16 @@ export function OnboardingWizard({ token, inline, autoApprove, onCredentials }: 
               <Step3Job data={formData.step3} onNext={handleNext} onBack={handleBack} />
             )}
             {step === 4 && (
-              <Step4Documents data={formData.step4} onNext={handleNext} onBack={handleBack} />
+              <Step4Documents 
+                data={formData.step4} 
+                onNext={handleNext} 
+                onBack={handleBack} 
+                onAutoSave={(stepData) => {
+                  const newFormData = { ...formData, step4: stepData };
+                  setFormData(newFormData);
+                  saveDraft(newFormData, 4);
+                }}
+              />
             )}
             {step === 5 && (
               <Step5Rules agreed={formData.step5} onNext={handleNext} onBack={handleBack} />

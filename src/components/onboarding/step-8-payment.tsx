@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,12 +48,17 @@ export function Step8Payment({ data, guest, onNext, onBack }: Props) {
   const [formData, setFormData] = useState<Step8Payment>(
     data || {
       method: "",
-      amountPaid: 0,
+      amountPaid: totalPayable > 0 ? totalPayable : 0,
       transactionId: "",
       proofUrl: "",
     }
   );
 
+  useEffect(() => {
+    if (!data && formData.amountPaid === 0 && totalPayable > 0) {
+      setFormData((prev) => ({ ...prev, amountPaid: totalPayable }));
+    }
+  }, [totalPayable, data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

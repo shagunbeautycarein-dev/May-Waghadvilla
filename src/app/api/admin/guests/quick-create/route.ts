@@ -1,4 +1,4 @@
-﻿import { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -77,7 +77,7 @@ export async function POST(request: Request) {
 
     await prisma.bed.update({
       where: { id: data.bedId },
-      data: { status: "Reserved" },
+      data: { status: "Reserved", currentGuestId: guest.id },
     });
 
     return NextResponse.json({ guest }, { status: 201 });

@@ -28,11 +28,13 @@ export async function GET(request: NextRequest) {
     if (status) {
       where.status = status;
     } else {
-      // By default, hide guests who are still in the onboarding phase.
-      // They belong in the Approval Center. "Active (Pending Move-In)" should be visible here.
+      // By default, hide only fully inactive or draft-only records.
+      // "Onboarding Started" / "Pending Onboarding" guests are shown so admin
+      // can see reserved beds and resend the onboarding link if needed.
+      // They can still be filtered via the Approval Center for approval actions.
       where.NOT = {
         status: {
-          in: ["Onboarding Started", "Onboarding Submitted", "Draft"],
+          in: ["Inactive", "Draft"],
         },
       };
     }

@@ -211,12 +211,20 @@ export default function GuestProfilePage() {
         </div>
         <div className="p-5">
           {docs.aadhar || docs.pan || docs.photo || docs.idFrontUrl ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
               {docs.aadhar && (
                 <div>
-                  <p className="text-xs font-medium text-slate-500 mb-2">Aadhar Card</p>
+                  <p className="text-xs font-medium text-slate-500 mb-2">Aadhar (Front)</p>
                   <div className="rounded-xl border border-slate-100 overflow-hidden bg-slate-50">
-                    <img src={docs.aadhar} alt="Aadhar" className="w-full h-32 object-contain" />
+                    <img src={docs.aadhar} alt="Aadhar Front" className="w-full h-32 object-contain" />
+                  </div>
+                </div>
+              )}
+              {docs.aadharBack && (
+                <div>
+                  <p className="text-xs font-medium text-slate-500 mb-2">Aadhar (Back)</p>
+                  <div className="rounded-xl border border-slate-100 overflow-hidden bg-slate-50">
+                    <img src={docs.aadharBack} alt="Aadhar Back" className="w-full h-32 object-contain" />
                   </div>
                 </div>
               )}

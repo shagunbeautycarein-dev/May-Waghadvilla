@@ -25,9 +25,9 @@ export async function POST(request: Request) {
 
     // Validate documents are uploaded
     const docs = data.step4 || {};
-    if (!docs.aadhar || !docs.pan || !docs.photo) {
+    if (!docs.aadhar || !docs.aadharBack || !docs.pan || !docs.photo) {
       return NextResponse.json(
-        { error: "Please upload Aadhar Card, PAN Card, and Passport Photo before submitting." },
+        { error: "Please upload Aadhar Card (Front & Back), PAN Card, and Passport Photo before submitting." },
         { status: 400 }
       );
     }
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     if (guest.bedId) {
       await prisma.bed.update({
         where: { id: guest.bedId },
-        data: { status: bedStatus },
+        data: { status: bedStatus, currentGuestId: guest.id },
       });
     }
 

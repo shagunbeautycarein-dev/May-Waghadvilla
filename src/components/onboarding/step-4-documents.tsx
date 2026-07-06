@@ -10,6 +10,7 @@ interface Props {
   data?: Step4Documents;
   onNext: (data: Step4Documents) => void;
   onBack: () => void;
+  onAutoSave?: (data: Step4Documents) => void;
 }
 
 type DocType = "aadhar" | "pan" | "photo";
@@ -20,18 +21,28 @@ const DOC_CONFIG: { key: DocType; label: string; icon: React.ElementType }[] = [
   { key: "photo", label: "Passport Photo", icon: User },
 ];
 
-export function Step4Documents({ data, onNext, onBack }: Props) {
+export function Step4Documents({ data, onNext, onBack, onAutoSave }: Props) {
   const [formData, setFormData] = useState<Step4Documents>(
     data || { aadhar: "", pan: "", photo: "" }
   );
   const [activeTab, setActiveTab] = useState<DocType>("aadhar");
   const [error, setError] = useState("");
 
+  const updateData = (updates: Partial<Step4Documents>) => {
+    setFormData((prev) => {
+      const next = { ...prev, ...updates };
+      if (onAutoSave) {
+        setTimeout(() => onAutoSave(next), 0);
+      }
+      return next;
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!formData.aadhar || !formData.pan || !formData.photo) {
-      setError("Please upload Aadhar Card, PAN Card, and Passport Photo to continue.");
+    if (!formData.aadhar || !formData.aadharBack || !formData.pan || !formData.photo) {
+      setError("Please upload Aadhar Card (Front & Back), PAN Card, and Passport Photo to continue.");
       return;
     }
     onNext(formData);
@@ -42,7 +53,7 @@ export function Step4Documents({ data, onNext, onBack }: Props) {
       {/* Document Type Tabs */}
       <div className="flex gap-2">
         {DOC_CONFIG.map((doc) => {
-          const hasFile = !!formData[doc.key];
+          const hasFile = doc.key === "aadhar" ? !!formData.aadhar && !!formData.aadharBack : !!formData[doc.key as keyof Step4Documents];
           return (
             <button
               key={doc.key}
@@ -69,7 +80,37 @@ export function Step4Documents({ data, onNext, onBack }: Props) {
       {/* Upload Area per active tab */}
       {DOC_CONFIG.map((doc) => {
         if (doc.key !== activeTab) return null;
-        const value = formData[doc.key];
+        
+        if (doc.key === "aadhar") {
+          return (
+            <div key={doc.key} className="space-y-5">
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-900">
+                  Upload Aadhar Card (Front Side)
+                </p>
+                <CloudinaryUpload
+                  images={formData.aadhar ? [formData.aadhar] : []}
+                  onChange={(urls) => updateData({ aadhar: urls[0] || "" })}
+                  maxFiles={1}
+                  folder={`waghad-villa/documents/aadhar_front`}
+                />
+              </div>
+              <div className="space-y-3">
+                <p className="text-sm font-medium text-slate-900">
+                  Upload Aadhar Card (Back Side)
+                </p>
+                <CloudinaryUpload
+                  images={formData.aadharBack ? [formData.aadharBack] : []}
+                  onChange={(urls) => updateData({ aadharBack: urls[0] || "" })}
+                  maxFiles={1}
+                  folder={`waghad-villa/documents/aadhar_back`}
+                />
+              </div>
+            </div>
+          );
+        }
+
+        const value = formData[doc.key as keyof Step4Documents] as string;
         return (
           <div key={doc.key} className="space-y-3">
             <p className="text-sm font-medium text-slate-900">
@@ -77,7 +118,7 @@ export function Step4Documents({ data, onNext, onBack }: Props) {
             </p>
             <CloudinaryUpload
               images={value ? [value] : []}
-              onChange={(urls) => setFormData((prev) => ({ ...prev, [doc.key]: urls[0] || "" }))}
+              onChange={(urls) => updateData({ [doc.key]: urls[0] || "" })}
               maxFiles={1}
               folder={`waghad-villa/documents/${doc.key}`}
             />

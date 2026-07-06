@@ -84,7 +84,11 @@ export async function POST(request: Request) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    const bedStatus = joinDate > today ? "Move-In Scheduled" : "Occupied";
+    // Only set Occupied/Move-In Scheduled when admin is directly activating the guest.
+    // For standard inquiry-to-onboarding flow, use "Reserved" until onboarding is approved.
+    const bedStatus = shouldGeneratePassword
+      ? (joinDate > today ? "Move-In Scheduled" : "Occupied")
+      : "Reserved";
 
     if (existingGuest) {
       // Update existing guest instead of failing

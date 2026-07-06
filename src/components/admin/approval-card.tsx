@@ -487,14 +487,26 @@ export function ApprovalCard({ data, type, onAction }: ApprovalCardProps) {
             <SectionHeader label="KYC Documents" sectionKey="docs" icon={FileText} />
             {openSection === "docs" && (
               <div className="px-4 pb-3">
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                   {s4.aadhar && (
                     <div>
-                      <p className="text-xs text-slate-500 mb-1.5">Aadhar Card</p>
+                      <p className="text-xs text-slate-500 mb-1.5">Aadhar (Front)</p>
                       <div className="rounded-lg border border-slate-100 bg-white overflow-hidden">
                         <img
                           src={s4.aadhar}
-                          alt="Aadhar"
+                          alt="Aadhar Front"
+                          className="w-full h-32 object-contain"
+                        />
+                      </div>
+                    </div>
+                  )}
+                  {s4.aadharBack && (
+                    <div>
+                      <p className="text-xs text-slate-500 mb-1.5">Aadhar (Back)</p>
+                      <div className="rounded-lg border border-slate-100 bg-white overflow-hidden">
+                        <img
+                          src={s4.aadharBack}
+                          alt="Aadhar Back"
                           className="w-full h-32 object-contain"
                         />
                       </div>
@@ -502,7 +514,7 @@ export function ApprovalCard({ data, type, onAction }: ApprovalCardProps) {
                   )}
                   {s4.pan && (
                     <div>
-                      <p className="text-xs text-slate-500 mb-1.5">Aadhaar Card</p>
+                      <p className="text-xs text-slate-500 mb-1.5">PAN Card</p>
                       <div className="rounded-lg border border-slate-100 bg-white overflow-hidden">
                         <img
                           src={s4.pan}

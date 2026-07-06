@@ -42,6 +42,7 @@ const roomUpdateSchema = z.object({
   coverImage: z.string().optional(),
   description: z.string().optional(),
   showOnHomePage: z.boolean().default(false),
+  beds: z.array(bedInputSchema).optional(),
 });
 
 export async function GET() {
@@ -135,7 +136,7 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const { id, floorId, floorName, ...data } = roomUpdateSchema.parse(body);
+    const { id, floorId, floorName, beds: incomingBeds, ...data } = roomUpdateSchema.parse(body);
 
     const room = await prisma.room.update({
       where: { id },
@@ -144,6 +145,58 @@ export async function PATCH(request: Request) {
         ...(floorId ? { floorId } : {}),
       },
     });
+
+    // ── Sync beds if the caller sent a beds array ─────────────────────────
+    if (incomingBeds && incomingBeds.length > 0) {
+      const existingBeds = await prisma.bed.findMany({
+        where: { roomId: id, deletedAt: null },
+        orderBy: { name: "asc" },
+      });
+
+      const existingNames = new Set(existingBeds.map((b) => b.name));
+      const incomingNames = new Set(incomingBeds.map((b) => b.name));
+
+      // 1. Update rent/deposit for beds that already exist
+      await Promise.all(
+        incomingBeds
+          .filter((b) => existingNames.has(b.name))
+          .map((b) => {
+            const existing = existingBeds.find((e) => e.name === b.name)!;
+            return prisma.bed.update({
+              where: { id: existing.id },
+              data: { rent: b.rent, deposit: b.deposit },
+            });
+          })
+      );
+
+      // 2. Create new beds that don't exist yet
+      const newBeds = incomingBeds.filter((b) => !existingNames.has(b.name));
+      if (newBeds.length > 0) {
+        await prisma.bed.createMany({
+          data: newBeds.map((b) => ({
+            roomId: id,
+            name: b.name,
+            rent: b.rent,
+            deposit: b.deposit,
+          })),
+        });
+      }
+
+      // 3. Soft-delete beds that were removed — ONLY if Available
+      //    Occupied/Reserved beds are kept to avoid orphaning guests
+      const removedNames = [...existingNames].filter((n) => !incomingNames.has(n));
+      if (removedNames.length > 0) {
+        await prisma.bed.updateMany({
+          where: {
+            roomId: id,
+            name: { in: removedNames },
+            deletedAt: null,
+            status: "Available", // never remove occupied/reserved beds
+          },
+          data: { deletedAt: new Date() },
+        });
+      }
+    }
 
     return NextResponse.json(room);
   } catch (error) {

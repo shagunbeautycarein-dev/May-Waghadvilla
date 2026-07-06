@@ -110,15 +110,21 @@ export function Step9Review({ data, guest, onSubmit, onBack }: Props) {
           <div className="pt-3 space-y-3">
             {!docsComplete && (
               <div className="text-sm text-red-600 bg-red-50 rounded-lg px-3 py-2">
-                <strong>Documents Required:</strong> Please upload Aadhar Card, PAN Card, and Passport Photo before submitting.
+                <strong>Documents Required:</strong> Please upload Aadhar Card (Front & Back), PAN Card, and Passport Photo before submitting.
               </div>
             )}
             {hasNewDocs ? (
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 {docs.aadhar && (
                   <div>
-                    <p className="text-xs text-slate-400 mb-1">Aadhar Card ✓</p>
-                    <img src={docs.aadhar} alt="Aadhar" className="h-20 object-contain rounded-lg border border-slate-100 bg-slate-50" />
+                    <p className="text-xs text-slate-400 mb-1">Aadhar (Front) ✓</p>
+                    <img src={docs.aadhar} alt="Aadhar Front" className="h-20 object-contain rounded-lg border border-slate-100 bg-slate-50" />
+                  </div>
+                )}
+                {docs.aadharBack && (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-1">Aadhar (Back) ✓</p>
+                    <img src={docs.aadharBack} alt="Aadhar Back" className="h-20 object-contain rounded-lg border border-slate-100 bg-slate-50" />
                   </div>
                 )}
                 {docs.pan && (

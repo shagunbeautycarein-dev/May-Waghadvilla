@@ -66,6 +66,9 @@ import {
   UserPlus,
   Wallet,
   Plus,
+  Link2,
+  Copy,
+  CheckCheck,
 } from "lucide-react";
 import { generateGuestPDF } from "@/lib/guest-pdf";
 import { AddGuestModal } from "@/components/admin/add-guest-modal";
@@ -275,6 +278,12 @@ export default function GuestsPage() {
   const [deactivatingId, setDeactivatingId] = useState<string | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
+  // Resend onboarding link
+  const [resendLinkGuestId, setResendLinkGuestId] = useState<string | null>(null);
+  const [resendLinkLoading, setResendLinkLoading] = useState(false);
+  const [generatedLink, setGeneratedLink] = useState<string | null>(null);
+  const [linkCopied, setLinkCopied] = useState(false);
+
   // Image viewer
   const [viewImage, setViewImage] = useState<string | null>(null);
 
@@ -339,7 +348,28 @@ export default function GuestsPage() {
     }
   };
 
-  const openEdit = (guest: GuestSummary) => {
+  const openEdit = async (guest: GuestSummary) => {
+    if (guest.status === "Onboarding Started" || guest.status === "Pending Onboarding") {
+      const loadingToast = toast.loading("Resuming onboarding...");
+      try {
+        const res = await fetch("/api/admin/onboarding-tokens", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guestId: guest.id }),
+        });
+        if (!res.ok) throw new Error("Failed");
+        const data = await res.json();
+        toast.dismiss(loadingToast);
+        
+        // Open the onboarding flow
+        window.open(data.link, '_blank');
+      } catch {
+        toast.dismiss(loadingToast);
+        toast.error("Failed to resume onboarding");
+      }
+      return;
+    }
+
     setEditGuest(guest);
     setEditForm({
       name: guest.name,
@@ -397,6 +427,36 @@ export default function GuestsPage() {
     }
   };
 
+  const handleResendLink = async (guestId: string) => {
+    setResendLinkGuestId(guestId);
+    setGeneratedLink(null);
+    setLinkCopied(false);
+    setResendLinkLoading(true);
+    try {
+      const res = await fetch("/api/admin/onboarding-tokens", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ guestId }),
+      });
+      if (!res.ok) throw new Error("Failed");
+      const data = await res.json();
+      setGeneratedLink(data.link);
+    } catch {
+      toast.error("Failed to generate onboarding link");
+      setResendLinkGuestId(null);
+    } finally {
+      setResendLinkLoading(false);
+    }
+  };
+
+  const handleCopyLink = () => {
+    if (!generatedLink) return;
+    navigator.clipboard.writeText(generatedLink);
+    setLinkCopied(true);
+    toast.success("Link copied!");
+    setTimeout(() => setLinkCopied(false), 3000);
+  };
+
   const totalPages = Math.ceil(total / limit);
 
   return (
@@ -438,11 +498,12 @@ export default function GuestsPage() {
         >
           <option value="">All Statuses</option>
           <option value="Active">Active</option>
-          <option value="Notice Period">Notice Period</option>
-          <option value="Inactive">Inactive</option>
           <option value="Active (Pending Move-In)">Move-In Scheduled</option>
-          <option value="Onboarding Started">Onboarding Started</option>
+          <option value="Notice Period">Notice Period</option>
+          <option value="Onboarding Started">Onboarding In Progress</option>
+          <option value="Pending Onboarding">Pending Onboarding</option>
           <option value="Onboarding Submitted">Onboarding Submitted</option>
+          <option value="Inactive">Inactive</option>
         </select>
         <select
           value={roomFilter}
@@ -554,16 +615,35 @@ export default function GuestsPage() {
                           </TooltipTrigger>
                           <TooltipContent>Edit guest</TooltipContent>
                         </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button size="sm" variant="ghost" asChild className="h-8 w-8 p-0 text-slate-500 hover:text-teal-600">
-                              <Link href={`/admin/bed-transfers?guest=${guest.id}`}>
-                                <ArrowRightLeft className="h-4 w-4" />
-                              </Link>
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>Transfer bed</TooltipContent>
-                        </Tooltip>
+                        {/* Resend onboarding link — only for in-progress guests */}
+                        {(guest.status === "Onboarding Started" || guest.status === "Pending Onboarding") && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => handleResendLink(guest.id)}
+                                className="h-8 w-8 p-0 text-blue-500 hover:text-blue-700 hover:bg-blue-50"
+                              >
+                                <Link2 className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Resend onboarding link</TooltipContent>
+                          </Tooltip>
+                        )}
+                        {/* Transfer bed only for active guests */}
+                        {guest.status !== "Onboarding Started" && guest.status !== "Pending Onboarding" && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button size="sm" variant="ghost" asChild className="h-8 w-8 p-0 text-slate-500 hover:text-teal-600">
+                                <Link href={`/admin/bed-transfers?guest=${guest.id}`}>
+                                  <ArrowRightLeft className="h-4 w-4" />
+                                </Link>
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Transfer bed</TooltipContent>
+                          </Tooltip>
+                        )}
                         <AlertDialog>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -578,19 +658,21 @@ export default function GuestsPage() {
                                 </Button>
                               </AlertDialogTrigger>
                             </TooltipTrigger>
-                            <TooltipContent>Deactivate guest</TooltipContent>
+                            <TooltipContent>{guest.status === "Onboarding Started" || guest.status === "Pending Onboarding" ? "Cancel & free bed" : "Deactivate guest"}</TooltipContent>
                           </Tooltip>
                           <AlertDialogContent>
                             <AlertDialogHeader>
-                              <AlertDialogTitle>Deactivate Guest?</AlertDialogTitle>
+                              <AlertDialogTitle>{guest.status === "Onboarding Started" || guest.status === "Pending Onboarding" ? "Cancel Onboarding?" : "Deactivate Guest?"}</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will free their bed and mark them as inactive. This action cannot be undone.
+                                {guest.status === "Onboarding Started" || guest.status === "Pending Onboarding"
+                                  ? "This will cancel the onboarding, free the reserved bed, and remove this guest. This cannot be undone."
+                                  : "This will free their bed and mark them as inactive. This action cannot be undone."}
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction onClick={() => handleDeactivate(guest.id)} className="bg-red-600 hover:bg-red-700">
-                                Deactivate
+                                {guest.status === "Onboarding Started" || guest.status === "Pending Onboarding" ? "Cancel Onboarding" : "Deactivate"}
                               </AlertDialogAction>
                             </AlertDialogFooter>
                           </AlertDialogContent>
@@ -671,6 +753,53 @@ export default function GuestsPage() {
           </div>
         )}
       </div>
+
+      {/* ─── Resend Onboarding Link Modal ─────────────────────────── */}
+      <Dialog open={!!resendLinkGuestId} onOpenChange={(open) => { if (!open) { setResendLinkGuestId(null); setGeneratedLink(null); setLinkCopied(false); } }}>
+        <DialogContent className="max-w-md rounded-2xl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Link2 className="h-5 w-5 text-blue-500" />
+              Resend Onboarding Link
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            {resendLinkLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 text-teal-500 animate-spin" />
+                <span className="ml-3 text-sm text-slate-500">Generating secure link…</span>
+              </div>
+            ) : generatedLink ? (
+              <div className="space-y-3">
+                <p className="text-sm text-slate-600">
+                  Share this link with the guest. It is valid for <span className="font-semibold text-slate-800">7 days</span> and will allow them to continue their onboarding from where they left off.
+                </p>
+                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5">
+                  <span className="text-xs text-slate-600 truncate flex-1 font-mono">{generatedLink}</span>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleCopyLink}
+                    className={`h-7 px-2 shrink-0 transition-colors ${linkCopied ? "text-emerald-600 hover:text-emerald-700" : "text-blue-500 hover:text-blue-700"}`}
+                  >
+                    {linkCopied ? <CheckCheck className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+                {linkCopied && (
+                  <p className="text-xs text-emerald-600 font-medium">✓ Link copied to clipboard!</p>
+                )}
+                <Button
+                  className="w-full rounded-xl bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={handleCopyLink}
+                >
+                  <Copy className="mr-2 h-4 w-4" />
+                  {linkCopied ? "Copied!" : "Copy Link"}
+                </Button>
+              </div>
+            ) : null}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* ─── Guest Detail: Custom Overlay Modal ──────────────────────── */}
       {(!!detailGuest || detailLoading) && (
@@ -1152,12 +1281,13 @@ function JobTab({ guest }: { guest: GuestDetail }) {
 function DocumentsTab({ guest, onViewImage }: { guest: GuestDetail; onViewImage: (url: string) => void }) {
   const docs = guest.onboardingData?.step4Documents;
   const items = [
-    { label: "Aadhaar Card", url: docs?.aadhar },
+    { label: "Aadhar (Front)", url: docs?.aadhar },
+    { label: "Aadhar (Back)", url: docs?.aadharBack },
     { label: "PAN Card", url: docs?.pan },
     { label: "Passport Photo", url: docs?.photo },
   ];
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
       {items.map((item) => (
         <div key={item.label} className="bg-slate-50 rounded-xl border border-slate-100 p-4 text-center">
           <p className="text-xs font-medium text-slate-600 mb-3">{item.label}</p>

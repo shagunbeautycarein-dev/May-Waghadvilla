@@ -361,11 +361,25 @@ function RoomWizard({ floors, step }: { floors: Floor[]; step: number }) {
 
   const handleSharingChange = (value: string) => {
     const count = SHARING_BED_COUNTS[value] || 1;
-    const newBeds = Array.from({ length: count }, (_, i) => ({
-      name: BED_NAMES[i] || String.fromCharCode(65 + i),
-      rent: beds[0]?.rent || 5000,
-      deposit: beds[0]?.deposit || 5000,
-    }));
+    const currentBeds = watch("beds") || [];
+    let newBeds = [...currentBeds];
+
+    if (newBeds.length < count) {
+      // Add missing beds
+      const bedsToAdd = count - newBeds.length;
+      for (let i = 0; i < bedsToAdd; i++) {
+        const nextIndex = newBeds.length;
+        newBeds.push({
+          name: BED_NAMES[nextIndex] || String.fromCharCode(65 + nextIndex),
+          rent: currentBeds[0]?.rent || 5000,
+          deposit: currentBeds[0]?.deposit || 5000,
+        });
+      }
+    } else if (newBeds.length > count) {
+      // Remove extra beds
+      newBeds = newBeds.slice(0, count);
+    }
+    
     setValue("beds", newBeds, { shouldValidate: true });
   };
 
@@ -824,11 +838,25 @@ function EditRoomForm({ floors }: { floors: Floor[] }) {
 
   const handleSharingChange = (value: string) => {
     const count = SHARING_BED_COUNTS[value] || 1;
-    const newBeds = Array.from({ length: count }, (_, i) => ({
-      name: BED_NAMES[i] || String.fromCharCode(65 + i),
-      rent: beds[0]?.rent || 5000,
-      deposit: beds[0]?.deposit || 5000,
-    }));
+    const currentBeds = watch("beds") || [];
+    let newBeds = [...currentBeds];
+
+    if (newBeds.length < count) {
+      // Add missing beds
+      const bedsToAdd = count - newBeds.length;
+      for (let i = 0; i < bedsToAdd; i++) {
+        const nextIndex = newBeds.length;
+        newBeds.push({
+          name: BED_NAMES[nextIndex] || String.fromCharCode(65 + nextIndex),
+          rent: currentBeds[0]?.rent || 5000,
+          deposit: currentBeds[0]?.deposit || 5000,
+        });
+      }
+    } else if (newBeds.length > count) {
+      // Remove extra beds
+      newBeds = newBeds.slice(0, count);
+    }
+    
     setValue("beds", newBeds, { shouldValidate: true });
   };
 
