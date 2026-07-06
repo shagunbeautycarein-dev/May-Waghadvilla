@@ -11,6 +11,7 @@ import { formatDate, formatCurrency } from "@/lib/formatters";
 
 interface OnboardingDocs {
   aadhar?: string;
+  aadharBack?: string;
   pan?: string;
   photo?: string;
   idFrontUrl?: string;

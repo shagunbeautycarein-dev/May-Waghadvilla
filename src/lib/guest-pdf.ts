@@ -25,6 +25,7 @@ interface OnboardingData {
   } | null;
   step4Documents?: {
     aadhar?: string;
+    aadharBack?: string;
     pan?: string;
     photo?: string;
     idType?: string;

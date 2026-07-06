@@ -199,6 +199,7 @@ type OnboardingData = {
   } | null;
   step4Documents?: {
     aadhar?: string;
+    aadharBack?: string;
     pan?: string;
     photo?: string;
   } | null;
